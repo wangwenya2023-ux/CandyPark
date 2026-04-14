@@ -15,3 +15,6 @@ Thumbs.db
 
 # Extracted assets not used in web
 assets/neon/
+
+# Voice generation script (not needed in production)
+generate_voices.py
