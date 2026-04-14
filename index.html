@@ -407,6 +407,72 @@
     position: relative;
     overflow: hidden;
     background: rgba(255,255,255,0.08);
+    transition: overflow 0s;
+  }
+
+  /* ===== 表情弹出效果：第二次点击时表情跳出卡片框 ===== */
+  .tile.emoji-pop-out {
+    overflow: visible !important;
+    z-index: 50 !important;
+  }
+  .tile.emoji-pop-out .tile-avatar {
+    overflow: visible !important;
+  }
+  .tile.emoji-pop-out .emoji-sprite {
+    animation: emojiPopOut 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    z-index: 60 !important;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
+  }
+
+  /* 第一个选中的棋子也加弹出效果 */
+  .tile.emoji-pop-out-first {
+    overflow: visible !important;
+    z-index: 45 !important;
+  }
+  .tile.emoji-pop-out-first .tile-avatar {
+    overflow: visible !important;
+  }
+  .tile.emoji-pop-out-first .emoji-sprite {
+    animation: emojiPopOutFirst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    z-index: 55 !important;
+    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.2));
+  }
+
+  @keyframes emojiPopOut {
+    0%   { transform: scale(1) translateY(0) rotate(0deg); }
+    25%  { transform: scale(1.35) translateY(-18%) rotate(-5deg); }
+    45%  { transform: scale(1.55) translateY(-30%) rotate(4deg); }
+    65%  { transform: scale(1.45) translateY(-25%) rotate(-2deg); }
+    80%  { transform: scale(1.50) translateY(-28%) rotate(1deg); }
+    100% { transform: scale(1.45) translateY(-25%) rotate(0deg); }
+  }
+
+  @keyframes emojiPopOutFirst {
+    0%   { transform: scale(1) translateY(0) rotate(0deg); }
+    30%  { transform: scale(1.30) translateY(-15%) rotate(5deg); }
+    55%  { transform: scale(1.40) translateY(-22%) rotate(-3deg); }
+    75%  { transform: scale(1.35) translateY(-20%) rotate(1deg); }
+    100% { transform: scale(1.35) translateY(-18%) rotate(0deg); }
+  }
+
+  /* 匹配成功时两个表情一起欢快弹跳然后消失 */
+  .tile.emoji-match-celebrate {
+    overflow: visible !important;
+    z-index: 55 !important;
+  }
+  .tile.emoji-match-celebrate .tile-avatar {
+    overflow: visible !important;
+  }
+  .tile.emoji-match-celebrate .emoji-sprite {
+    animation: emojiMatchCelebrate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    z-index: 60 !important;
+  }
+
+  @keyframes emojiMatchCelebrate {
+    0%   { transform: scale(1.45) translateY(-25%) rotate(0deg); opacity: 1; }
+    30%  { transform: scale(1.65) translateY(-40%) rotate(-8deg); opacity: 1; }
+    60%  { transform: scale(1.55) translateY(-35%) rotate(6deg); opacity: 0.8; }
+    100% { transform: scale(0.3) translateY(-60%) rotate(15deg); opacity: 0; }
   }
 
   .tile .emoji-sprite {
@@ -1987,10 +2053,20 @@ function onTileClick(row, col) {
     if (prevType === type) {
       const path = findLinkPath(prev.row, prev.col, row, col);
       if (path) {
-        // Match success! Remove selection, animate, then show toast
+        // Match success! 表情弹出框外 + 欢庆动画
         if (tileElements[prev.row][prev.col]) tileElements[prev.row][prev.col].classList.remove('selected');
         selectedTile = null;
         isAnimating = true;
+
+        // 两个匹配的棋子表情同时弹出
+        const prevTileEl = tileElements[prev.row]?.[prev.col];
+        const currTileEl = tileElements[row]?.[col];
+        if (prevTileEl) {
+          prevTileEl.classList.add('emoji-pop-out-first');
+        }
+        if (currTileEl) {
+          currTileEl.classList.add('emoji-pop-out');
+        }
 
         const colors = TYPE_COLORS[type];
 const lineColor = colors ? colors[1] : '#ff69b4';
@@ -1998,6 +2074,18 @@ const lineColor = colors ? colors[1] : '#ff69b4';
 
         // 立即播放语音，不等连线动画结束（消除延迟感）
         speakWord(type);
+
+        // 弹出后短暂停留，再切换到欢庆消失动画
+        setTimeout(() => {
+          if (prevTileEl) {
+            prevTileEl.classList.remove('emoji-pop-out-first');
+            prevTileEl.classList.add('emoji-match-celebrate');
+          }
+          if (currTileEl) {
+            currTileEl.classList.remove('emoji-pop-out');
+            currTileEl.classList.add('emoji-match-celebrate');
+          }
+        }, 200);
 
         setTimeout(() => {
           removeTilePair(prev.row, prev.col, row, col, type);
@@ -2012,7 +2100,7 @@ const lineColor = colors ? colors[1] : '#ff69b4';
           } else if (!hasValidMoves()) {
             showNoMovesOverlay();
           }
-        }, 320);
+        }, 480);
         return;
       }
     }
