@@ -792,40 +792,22 @@ function calculateBoardSize() {
     const levelCols = levelConfig.cols;
     const levelRows = levelConfig.rows;
     
-    // 精确测量非棋盘区域实际占用的高度
-    // 通过DOM实际测量，如果DOM还没渲染则用估算值
-    let headerHeight = 0;
-    const titleBanner = document.querySelector('.title-banner');
-    const subtitle = document.querySelector('.subtitle');
-    const timerBar = document.querySelector('.timer-bar-container');
-    const scorePanel = document.querySelector('.score-panel');
-    const btnBar = document.querySelector('.btn-bar');
-    
-    if (titleBanner && scorePanel) {
-      headerHeight = (titleBanner.offsetHeight || 30)
-        + (subtitle ? subtitle.offsetHeight || 0 : 0)
-        + (timerBar ? timerBar.offsetHeight || 8 : 8)
-        + (scorePanel.offsetHeight || 28)
-        + (btnBar ? btnBar.offsetHeight || 34 : 34)
-        + 24; // margins总和
-    } else {
-      // DOM未渲染时的保守估算
-      headerHeight = 110;
-    }
-    
-    const availableHeight = screenHeight - headerHeight;
-    const availableWidth = screenWidth - 16; // 左右各留8px
+    // 棋盘可用区域：屏幕高度的78%给棋盘（剩余22%给Logo+面板+按钮）
+    // 这个比例在各种手机上都能保证棋盘最大化且不溢出
+    const boardRatio = 0.78;
+    const availableHeight = Math.floor(screenHeight * boardRatio);
+    const availableWidth = screenWidth - 12; // 左右各留6px
     
     // 分别按宽度和高度计算最大格子大小
-    const cellByWidth = Math.floor((availableWidth - 8) / levelCols);
-    const cellByHeight = Math.floor((availableHeight - 8) / levelRows);
+    const cellByWidth = Math.floor(availableWidth / levelCols);
+    const cellByHeight = Math.floor(availableHeight / levelRows);
     
     // 取较小值，确保棋盘完全可见
     const calculatedCellSize = Math.min(cellByWidth, cellByHeight);
     
-    // 放宽上限到120px，让小关卡的格子更大更清晰
-    TILE_SIZE = Math.max(36, Math.min(120, calculatedCellSize - 3));
-    GAP = Math.max(2, Math.min(5, Math.floor(TILE_SIZE * 0.05)));
+    // 放宽上限到130px，让小关卡的格子更大更清晰
+    TILE_SIZE = Math.max(36, Math.min(130, calculatedCellSize - 3));
+    GAP = Math.max(2, Math.min(4, Math.floor(TILE_SIZE * 0.04)));
     CELL = TILE_SIZE + GAP;
   } else {
     // 桌面端使用默认尺寸
@@ -1493,8 +1475,9 @@ function resizeBoardContainer() {
   const pad = isMobile ? 8 : 16;
   
   // 确保棋盘不会超出屏幕
-  const maxWidth = window.innerWidth - (isMobile ? 16 : 40);
-  const maxHeight = window.innerHeight - (isMobile ? 100 : 200);
+  const maxWidth = window.innerWidth - (isMobile ? 12 : 40);
+  // 移动端不再二次限制高度，calculateBoardSize已经用78%比例控制了
+  const maxHeight = isMobile ? (boardH + pad + 10) : (window.innerHeight - 200);
   
   const finalWidth = Math.min(boardW + pad, maxWidth);
   const finalHeight = Math.min(boardH + pad, maxHeight);
@@ -2796,12 +2779,15 @@ window.addEventListener('resize', () => {
   initBgParticles();
 });
 
-// 页面加载完成后再次检查尺寸
+// 页面加载完成后再次检查尺寸（确保移动端布局正确）
 window.addEventListener('load', () => {
-  setTimeout(() => {
-    resizeBoardContainer();
-    refreshAllSprites();
-  }, 100);
+  // 延迟多次刷新，确保所有字体和资源加载完成后布局正确
+  [100, 300, 600].forEach(delay => {
+    setTimeout(() => {
+      resizeBoardContainer();
+      refreshAllSprites();
+    }, delay);
+  });
 });
 
 </script>
