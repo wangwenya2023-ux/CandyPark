@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>🍭 Candy Park</title>
+<title>🍭 Candy Park · Tap, Listen & Match</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -65,28 +65,40 @@
   .title-banner::before { display: none; }
   .title-banner h1 {
     font-family: 'Fredoka One', cursive;
-    font-size: 3rem; line-height: 1.05; letter-spacing: 4px; text-align: center;
-    background: linear-gradient(135deg, #e91e63 0%, #ad1457 40%, #880e4f 100%);
+    font-size: 3.2rem; line-height: 1.05; letter-spacing: 3px; text-align: center;
+    /* 粉色到浅蓝的渐变 — 卡通糖果Logo */
+    background: linear-gradient(180deg, #ffb6d9 0%, #f48fb1 35%, #e991c5 55%, #c5a3d9 75%, #a8d8ea 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    filter: drop-shadow(0 2px 8px rgba(233,30,99,0.3)) drop-shadow(0 0 20px rgba(233,30,99,0.15));
+    /* 白色粗描边 — 卡通立体感 */
+    -webkit-text-stroke: 3px rgba(255,255,255,0.95);
+    paint-order: stroke fill;
+    text-shadow: none;
+    /* 多层阴影：深色外阴影 + 柔和光晕 */
+    filter:
+      drop-shadow(0 3px 0 rgba(180,120,160,0.5))
+      drop-shadow(0 6px 12px rgba(180,100,140,0.3))
+      drop-shadow(0 0 24px rgba(255,182,217,0.4));
     animation: titleGlow 3s ease-in-out infinite alternate;
   }
   @keyframes titleGlow {
-    0% { filter: drop-shadow(0 2px 8px rgba(233,30,99,0.3)) drop-shadow(0 0 20px rgba(233,30,99,0.15)); }
-    100% { filter: drop-shadow(0 2px 12px rgba(233,30,99,0.45)) drop-shadow(0 0 30px rgba(173,20,87,0.2)); }
+    0% { filter: drop-shadow(0 3px 0 rgba(180,120,160,0.5)) drop-shadow(0 6px 12px rgba(180,100,140,0.3)) drop-shadow(0 0 24px rgba(255,182,217,0.4)); }
+    100% { filter: drop-shadow(0 3px 0 rgba(180,120,160,0.6)) drop-shadow(0 6px 16px rgba(180,100,140,0.4)) drop-shadow(0 0 32px rgba(255,182,217,0.5)); }
   }
   .title-banner .logo-deco {
-    position: absolute; font-size: 1.8rem; z-index: 2;
-    filter: drop-shadow(0 2px 6px rgba(233,30,99,0.3)); pointer-events: none;
+    position: absolute; font-size: 2rem; z-index: 2;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15)); pointer-events: none;
   }
-  .title-banner .logo-deco.left { left: -24px; top: 50%; transform: translateY(-50%) rotate(-15deg); }
-  .title-banner .logo-deco.right { right: -24px; top: 50%; transform: translateY(-50%) rotate(15deg) scaleX(-1); }
+  .title-banner .logo-deco.left { left: -28px; top: 50%; transform: translateY(-50%) rotate(-15deg); }
+  .title-banner .logo-deco.right { right: -28px; top: 50%; transform: translateY(-50%) rotate(15deg) scaleX(-1); }
   .subtitle {
-    font-family: 'Nunito', sans-serif; color: #ad1457;
-    margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; z-index: 1;
-    text-shadow: 0 1px 4px rgba(233,30,99,0.2);
-    letter-spacing: 3px; text-transform: uppercase;
-  }  /* Timer Bar - Neon */
+    font-family: 'Nunito', sans-serif; color: #fff;
+    margin-bottom: 6px; font-size: 1.05rem; font-weight: 800; z-index: 1;
+    text-shadow:
+      0 2px 0 rgba(160,100,140,0.4),
+      0 2px 8px rgba(0,0,0,0.2),
+      0 0 16px rgba(255,182,217,0.3);
+    letter-spacing: 2.5px;
+  }  }  /* Timer Bar - Neon */
   .timer-bar-container {
     width: auto; height: 14px;
     background: rgba(255,255,255,0.45);
@@ -131,106 +143,122 @@
     font-size: 1rem; margin-left: 3px;
     text-shadow: 0 1px 4px rgba(233,30,99,0.2);
   }
-  /* Game Board - Dark Neon */
+  /* Game Board - 糖果实色背景 */
   #game-board {
     position: relative; border-radius: 16px;
-    background: rgba(255, 240, 245, 0.5);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    background: #fdeef4;
     overflow: visible; z-index: 20; padding: 8px;
     touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none; user-select: none; cursor: pointer;
     max-width: 100vw; box-sizing: border-box;
-    border: 1px solid rgba(255,255,255,0.5);
-    box-shadow: 0 4px 24px rgba(233,30,99,0.08), inset 0 1px 0 rgba(255,255,255,0.4);
   }
   .board-frame { position: relative; display: inline-block; padding: 0; background: none; }
-  /* Tiles - Neon Candy */
+  /* Tiles - Soft candy pastels */
   .tile {
     position: absolute; cursor: pointer;
     transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, filter 0.1s ease;
-    border-radius: 16px; border: 2px solid transparent;
+    border-radius: 18px; border: 3px solid transparent;
     overflow: hidden; z-index: 1; will-change: transform;
     display: flex; flex-direction: column; align-items: stretch;
     touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
   .tile[data-type="0"] {
-    border-color: #f48fb1;
-    background: linear-gradient(145deg, rgba(244,143,177,0.35) 0%, rgba(244,143,177,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(233,30,99,0.15), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Strawberry Pink */
+    border-color: #f06292;
+    background: linear-gradient(145deg, #f8a4c0 0%, #f06292 50%, #e04878 100%);
+    box-shadow: 0 3px 8px rgba(240,98,146,0.35);
   }
   .tile[data-type="1"] {
-    border-color: #ffab91;
-    background: linear-gradient(145deg, rgba(255,171,145,0.35) 0%, rgba(255,171,145,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(255,87,34,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Tangerine Orange */
+    border-color: #ffb74d;
+    background: linear-gradient(145deg, #ffd699 0%, #ffb74d 50%, #ffa726 100%);
+    box-shadow: 0 3px 8px rgba(255,183,77,0.35);
   }
   .tile[data-type="2"] {
-    border-color: #a5d6a7;
-    background: linear-gradient(145deg, rgba(165,214,167,0.35) 0%, rgba(165,214,167,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(76,175,80,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Mint Candy */
+    border-color: #a8d8b0;
+    background: linear-gradient(145deg, #d4eedb 0%, #b8dfc0 50%, #9ecfaa 100%);
+    box-shadow: 0 3px 8px rgba(158,207,170,0.32);
   }
   .tile[data-type="3"] {
-    border-color: #90caf9;
-    background: linear-gradient(145deg, rgba(144,202,249,0.35) 0%, rgba(144,202,249,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(33,150,243,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Blueberry */
+    border-color: #64b5f6;
+    background: linear-gradient(145deg, #a3d5ff 0%, #64b5f6 50%, #42a5f5 100%);
+    box-shadow: 0 3px 8px rgba(100,181,246,0.35);
   }
   .tile[data-type="4"] {
-    border-color: #ce93d8;
-    background: linear-gradient(145deg, rgba(206,147,216,0.35) 0%, rgba(206,147,216,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(156,39,176,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Grape Purple */
+    border-color: #ba68c8;
+    background: linear-gradient(145deg, #d7a0e0 0%, #ba68c8 50%, #ab47bc 100%);
+    box-shadow: 0 3px 8px rgba(186,104,200,0.35);
   }
   .tile[data-type="5"] {
-    border-color: #f8bbd0;
-    background: linear-gradient(145deg, rgba(248,187,208,0.35) 0%, rgba(248,187,208,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(233,30,99,0.1), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Bubblegum Rose */
+    border-color: #f48fb1;
+    background: linear-gradient(145deg, #f8bbd0 0%, #f48fb1 50%, #ec407a 100%);
+    box-shadow: 0 3px 8px rgba(244,143,177,0.35);
   }
   .tile[data-type="6"] {
-    border-color: #80deea;
-    background: linear-gradient(145deg, rgba(128,222,234,0.35) 0%, rgba(128,222,234,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(0,188,212,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Cotton Candy Cyan */
+    border-color: #4dd0e1;
+    background: linear-gradient(145deg, #99e5ed 0%, #4dd0e1 50%, #26c6da 100%);
+    box-shadow: 0 3px 8px rgba(77,208,225,0.35);
   }
   .tile[data-type="7"] {
-    border-color: #fff176;
-    background: linear-gradient(145deg, rgba(255,241,118,0.35) 0%, rgba(255,241,118,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(255,193,7,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Lemon Yellow */
+    border-color: #ffd54f;
+    background: linear-gradient(145deg, #ffe88a 0%, #ffd54f 50%, #ffca28 100%);
+    box-shadow: 0 3px 8px rgba(255,213,79,0.35);
   }
   .tile[data-type="8"] {
-    border-color: #ffab91;
-    background: linear-gradient(145deg, rgba(255,171,145,0.35) 0%, rgba(255,171,145,0.15) 100%);
-    box-shadow: 0 3px 10px rgba(255,87,34,0.12), inset 0 1px 0 rgba(255,255,255,0.4);
+    /* Peach Coral */
+    border-color: #ff8a65;
+    background: linear-gradient(145deg, #ffb89a 0%, #ff8a65 50%, #ff7043 100%);
+    box-shadow: 0 3px 8px rgba(255,138,101,0.35);
   }
   /* Neon shine effect */
+  /* Candy shine - 柔和的光泽效果 */
   .tile::before {
     content: '';
-    position: absolute; top: 2px; left: 10%; width: 80%; height: 16%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, transparent 100%);
+    position: absolute; top: 3px; left: 10%; width: 80%; height: 18%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 60%, transparent 100%);
     border-radius: 10px 10px 50% 50%; pointer-events: none; z-index: 20;
   }
   .tile:hover {
     transform: scale(1.11) translateY(-3px); z-index: 10;
-    filter: brightness(1.2) saturate(1.2);
+    filter: brightness(1.05) saturate(1.10);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
   }
   .tile:hover .emoji-sprite { background-image: url('1776060717188131.png') !important; }
   .tile.selected {
-    border-color: #e91e63 !important;
+    border-color: #fff !important;
     box-shadow:
-      0 0 0 2px #e91e63,
-      0 0 16px 3px rgba(233,30,99,0.35),
-      0 0 30px 6px rgba(233,30,99,0.12),
-      0 6px 20px rgba(0,0,0,0.15) !important;
+      0 0 0 3px #ff69b4,
+      0 0 18px 4px rgba(255,105,180,0.45),
+      0 0 36px 8px rgba(255,105,180,0.15),
+      0 8px 24px rgba(0,0,0,0.15) !important;
     transform: scale(1.18) translateY(-6px); z-index: 20;
-    filter: brightness(1.1) saturate(1.15);
+    filter: brightness(1.08) saturate(1.15) drop-shadow(0 0 6px rgba(255,105,180,0.4));
     animation: selectedPulse 0.7s ease-in-out infinite;
   }
   .tile.selected .emoji-sprite { background-image: url('1776060717188131.png') !important; }
   @keyframes selectedPulse {
     0%, 100% {
       transform: scale(1.18) translateY(-6px);
-      box-shadow: 0 0 0 2px #e91e63, 0 0 16px 3px rgba(233,30,99,0.35), 0 0 30px 6px rgba(233,30,99,0.12), 0 6px 20px rgba(0,0,0,0.15) !important;
+      box-shadow:
+        0 0 0 3px #ff69b4,
+        0 0 18px 4px rgba(255,105,180,0.45),
+        0 0 36px 8px rgba(255,105,180,0.15),
+        0 8px 24px rgba(0,0,0,0.15) !important;
     }
     50% {
       transform: scale(1.13) translateY(-4px);
-      box-shadow: 0 0 0 2px #e91e63, 0 0 10px 2px rgba(233,30,99,0.2), 0 0 20px 3px rgba(233,30,99,0.08), 0 4px 14px rgba(0,0,0,0.1) !important;
+      box-shadow:
+        0 0 0 2.5px #ff69b4,
+        0 0 12px 2px rgba(255,105,180,0.30),
+        0 0 24px 4px rgba(255,105,180,0.10),
+        0 5px 16px rgba(0,0,0,0.10) !important;
     }
   }
   .tile:active { transform: scale(0.88) !important; transition-duration: 0.04s !important; filter: brightness(0.85) !important; }
@@ -300,11 +328,11 @@
   }
   .tile-label {
     flex: 0 0 16%; display: flex; align-items: center; justify-content: center;
-    background: rgba(233,30,99,0.08); padding: 0 3px; overflow: hidden;
+    background: rgba(0,0,0,0.14); padding: 0 3px; overflow: hidden;
   }
   .tile-label span {
     font-family: 'Nunito', sans-serif; font-size: 0.52rem; font-weight: 600;
-    color: rgba(74,32,64,0.65); text-shadow: none;
+    color: rgba(255,255,255,0.88); text-shadow: 0 1px 2px rgba(0,0,0,0.28);
     letter-spacing: 0.4px; white-space: nowrap; overflow: hidden;
     text-overflow: ellipsis; line-height: 1; text-transform: uppercase;
   }
@@ -349,50 +377,45 @@
   .btn-bar { margin-top: 12px; display: flex; gap: 10px; z-index: 1; }
   .btn-bar button {
     font-family: 'Nunito', sans-serif; padding: 10px 26px;
-    border: 1.5px solid rgba(255,255,255,0.5); border-radius: 24px;
-    font-size: 0.9rem; cursor: pointer; color: #4a2040; font-weight: 800;
+    border: 2px solid rgba(255,255,255,0.4); border-radius: 24px;
+    font-size: 0.9rem; cursor: pointer; color: #fff; font-weight: 800;
     letter-spacing: 1px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
     transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
     position: relative; overflow: hidden;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
   .btn-bar button::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
     border-radius: 20px 20px 50% 50%; pointer-events: none;
   }
   .btn-bar button:hover { transform: translateY(-2px) scale(1.04); }
   .btn-bar button:active { transform: translateY(1px) scale(0.97); }
   #btn-restart {
-    background: linear-gradient(180deg, rgba(244,143,177,0.7) 0%, rgba(233,30,99,0.4) 100%);
-    border-color: rgba(233,30,99,0.3);
-    box-shadow: 0 3px 12px rgba(233,30,99,0.12);
-    color: #880e4f;
+    background: linear-gradient(180deg, #ff9a9e 0%, #f06292 100%);
+    border-color: #ec407a;
+    box-shadow: 0 3px 14px rgba(240,98,146,0.35);
   }
   #btn-hint {
-    background: linear-gradient(180deg, rgba(165,214,167,0.7) 0%, rgba(76,175,80,0.35) 100%);
-    border-color: rgba(76,175,80,0.3);
-    box-shadow: 0 3px 12px rgba(76,175,80,0.1);
-    color: #2e7d32;
+    background: linear-gradient(180deg, #a8e6cf 0%, #66bb6a 100%);
+    border-color: #4caf50;
+    box-shadow: 0 3px 14px rgba(102,187,106,0.3);
   }
   #btn-shuffle {
-    background: linear-gradient(180deg, rgba(144,202,249,0.7) 0%, rgba(33,150,243,0.35) 100%);
-    border-color: rgba(33,150,243,0.3);
-    box-shadow: 0 3px 12px rgba(33,150,243,0.1);
-    color: #1565c0;
+    background: linear-gradient(180deg, #a0c4ff 0%, #7c9ff5 100%);
+    border-color: #5c85e6;
+    box-shadow: 0 3px 14px rgba(124,159,245,0.35);
   }
   /* Power-up buttons */
   #btn-freeze {
-    background: linear-gradient(180deg, rgba(128,222,234,0.7) 0%, rgba(0,188,212,0.35) 100%);
-    border-color: rgba(0,188,212,0.3);
-    box-shadow: 0 3px 12px rgba(0,188,212,0.1);
-    color: #00838f;
+    background: linear-gradient(180deg, #b2ebf2 0%, #4dd0e1 100%);
+    border-color: #26c6da;
+    box-shadow: 0 3px 14px rgba(77,208,225,0.3);
   }
   #btn-bomb {
-    background: linear-gradient(180deg, rgba(255,171,145,0.7) 0%, rgba(255,87,34,0.35) 100%);
-    border-color: rgba(255,87,34,0.3);
-    box-shadow: 0 3px 12px rgba(255,87,34,0.1);
-    color: #bf360c;
+    background: linear-gradient(180deg, #ffccbc 0%, #ff8a65 100%);
+    border-color: #ff7043;
+    box-shadow: 0 3px 14px rgba(255,138,101,0.3);
   }
   .btn-bar button:disabled {
     opacity: 0.35; cursor: not-allowed; transform: none !important;
@@ -410,38 +433,40 @@
     background: rgba(0,0,0,0.35); display: flex; flex-direction: column;
     align-items: center; justify-content: center; z-index: 500;
     opacity: 0; pointer-events: none; transition: opacity 0.4s;
-    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
   .overlay.show { opacity: 1; pointer-events: all; }
   .overlay-box {
-    background: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.6);
+    border: 2px solid rgba(255,255,255,0.6);
     border-radius: 28px; padding: 36px 56px; text-align: center;
-    box-shadow: 0 8px 40px rgba(233,30,99,0.1), 0 0 60px rgba(233,30,99,0.05);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
   }
   .overlay h2 {
     font-family: 'Fredoka One', cursive; font-size: 2.2rem; margin-bottom: 12px;
-    background: linear-gradient(135deg, #e91e63 0%, #ad1457 50%, #880e4f 100%);
+    background: linear-gradient(180deg, #ffb6d9 0%, #f48fb1 35%, #c5a3d9 75%, #a8d8ea 100%);
     -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    filter: drop-shadow(0 2px 6px rgba(233,30,99,0.2));
+    -webkit-text-stroke: 2px rgba(255,255,255,0.9);
+    paint-order: stroke fill;
+    filter: drop-shadow(0 2px 0 rgba(180,120,160,0.4)) drop-shadow(0 4px 8px rgba(180,100,140,0.2));
   }
   .overlay p {
-    font-family: 'Nunito', sans-serif; color: #4a2040;
+    font-family: 'Nunito', sans-serif; color: #5d4037;
     font-size: 1.1rem; font-weight: 700; margin-bottom: 22px;
   }
   .overlay button {
     font-family: 'Nunito', sans-serif; padding: 12px 44px;
-    border: 1.5px solid rgba(233,30,99,0.3); border-radius: 24px;
-    font-size: 1rem; cursor: pointer; color: #880e4f; font-weight: 800;
-    background: linear-gradient(180deg, rgba(244,143,177,0.7) 0%, rgba(233,30,99,0.35) 100%);
-    box-shadow: 0 4px 16px rgba(233,30,99,0.15);
-    text-shadow: none;
+    border: 2px solid rgba(255,255,255,0.4); border-radius: 24px;
+    font-size: 1rem; cursor: pointer; color: #fff; font-weight: 800;
+    background: linear-gradient(180deg, #ff9a9e 0%, #f06292 100%);
+    box-shadow: 0 3px 14px rgba(240,98,146,0.35);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
     transition: transform 0.15s; position: relative; overflow: hidden; letter-spacing: 1px;
   }
   .overlay button::before {
     content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
     pointer-events: none; border-radius: 20px 20px 50% 50%;
   }
   .overlay button:hover { transform: scale(1.05); }
@@ -474,11 +499,11 @@
   }
   .match-toast {
     display: flex; flex-direction: column; align-items: center; gap: 6px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,255,255,0.6);
-    border-radius: 24px; padding: 18px 32px 14px;
-    box-shadow: 0 6px 24px rgba(233,30,99,0.1);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 28px; padding: 18px 32px 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.12);
     opacity: 0; transform: scale(0.3);
     transition: opacity 0.15s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
     pointer-events: none; white-space: nowrap;
@@ -486,10 +511,10 @@
   .match-toast.show { opacity: 1; transform: scale(1); }
   .match-toast.fade-out { opacity: 0; transform: scale(0.6) translateY(-20px); transition: opacity 0.25s ease, transform 0.25s ease; }
   .match-toast .toast-emoji {
-    width: 64px; height: 64px; border-radius: 14px;
-    border: 2px solid rgba(233,30,99,0.2); overflow: hidden; flex-shrink: 0;
+    width: 64px; height: 64px; border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.6); overflow: hidden; flex-shrink: 0;
     animation: toastBounce 0.5s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 3px 12px rgba(233,30,99,0.1);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
   }
   @keyframes toastBounce { 0% { transform: scale(0.2) rotate(-15deg); } 50% { transform: scale(1.15) rotate(5deg); } 70% { transform: scale(0.95) rotate(-2deg); } 100% { transform: scale(1) rotate(0deg); } }
   .match-toast .toast-emoji .emoji-sprite {
@@ -499,12 +524,12 @@
   }
   .match-toast .toast-word {
     font-size: 1.5rem; font-weight: 900; color: #e91e63;
-    text-shadow: 0 1px 4px rgba(233,30,99,0.2);
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
     letter-spacing: 1px; animation: wordPop 0.4s 0.1s cubic-bezier(0.34,1.56,0.64,1) both;
   }
   @keyframes wordPop { 0% { opacity: 0; transform: translateY(10px) scale(0.8); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
   .match-toast .toast-meaning {
-    font-size: 0.9rem; font-weight: 600; color: rgba(74,32,64,0.5);
+    font-size: 0.9rem; font-weight: 600; color: #a1887f;
     animation: wordPop 0.4s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
   }
   /* Screen shake for big combos */
@@ -537,8 +562,11 @@
   }
   /* Responsive */
   @media (max-width: 768px) {
-    .title-banner h1 { font-size: 2.4rem !important; }
-    .subtitle { font-size: 0.8rem !important; }
+    .title-banner h1 {
+      font-size: 2.4rem !important;
+      -webkit-text-stroke: 2px rgba(255,255,255,0.95) !important;
+    }
+    .subtitle { font-size: 0.9rem !important; }
     .score-panel { flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
     .score-item { padding: 2px 8px; font-size: 0.75rem; border-right: none; }
     .score-item .value { font-size: 0.85rem; }
@@ -563,7 +591,7 @@
   <h1>Candy<br>Park</h1>
   <span class="logo-deco right">🍭</span>
 </div>
-<p class="subtitle">✨ Sweet Match ✨</p>
+<p class="subtitle">Tap, Listen & Match</p>
 <div class="timer-bar-container">
   <div class="timer-bar" id="timer-bar"></div>
 </div>
