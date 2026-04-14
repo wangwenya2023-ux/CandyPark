@@ -1,11 +1,12 @@
 name: 🍭 Candy Park CI/CD
 
-# 触发条件：push 到 master 分支 或 PR 到 master 分支
+# 触发条件：push 到 master 分支、PR 到 master 分支、或手动触发
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
+  workflow_dispatch:
 
 # 设置 GITHUB_TOKEN 权限，用于部署到 Pages
 permissions:
@@ -242,8 +243,8 @@ jobs:
   deploy:
     name: 🚀 部署到 GitHub Pages
     needs: lint-and-test  # 依赖检查通过后才部署
-    # 仅在 push 到 master 时部署（PR 不部署）
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # 仅在 push 到 master 或手动触发时部署（PR 不部署）
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
