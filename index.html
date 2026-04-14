@@ -664,67 +664,96 @@
   }
   /* Responsive - 移动端全面优化 */
   @media (max-width: 768px) {
-    body { justify-content: flex-start; padding-top: 2px; overflow-y: auto; }
-    /* Logo 压缩为单行小尺寸 */
-    .title-banner { margin-bottom: 0px; margin-top: 0px; }
+    body {
+      justify-content: flex-start; padding-top: 0; overflow: hidden;
+      height: 100vh; height: 100dvh; /* 使用动态视口高度，排除浏览器地址栏 */
+    }
+    /* 棋盘容器弹性填充剩余空间 */
+    .board-frame {
+      flex: 1 1 auto !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      min-height: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    /* 按钮区域不被压缩 */
+    .btn-bar { flex-shrink: 0 !important; }
+    /* Logo 极致压缩 - 只保留一行小标题 */
+    .title-banner { margin: 0 !important; padding: 0 !important; }
     .title-banner h1 {
-      font-size: 1.4rem !important; line-height: 1 !important;
-      -webkit-text-stroke: 1.5px rgba(255,255,255,0.95) !important;
-      margin-bottom: 0 !important;
+      font-size: 1.15rem !important; line-height: 1 !important;
+      -webkit-text-stroke: 1.2px rgba(255,255,255,0.95) !important;
+      margin: 2px 0 0 0 !important;
     }
     .title-banner h1 br { display: none; }
-    .title-banner .logo-deco { font-size: 1rem !important; }
-    .title-banner .logo-deco.left { left: -14px !important; }
-    .title-banner .logo-deco.right { right: -14px !important; }
-    .subtitle { font-size: 0.55rem !important; margin-bottom: 1px !important; letter-spacing: 1px !important; margin-top: 0 !important; }
-    /* 进度条压缩 */
-    .timer-bar-container { height: 6px !important; margin-bottom: 2px !important; border-radius: 4px !important; }
-    .timer-bar { border-radius: 3px !important; }
-    /* 信息面板 - 单行紧凑横排 */
+    .title-banner .logo-deco { font-size: 0.8rem !important; }
+    .title-banner .logo-deco.left { left: -10px !important; }
+    .title-banner .logo-deco.right { right: -10px !important; }
+    /* 副标题隐藏 - 手机上不需要 */
+    .subtitle { display: none !important; }
+    /* 进度条极致压缩 */
+    .timer-bar-container { height: 4px !important; margin: 1px auto !important; border-radius: 3px !important; }
+    .timer-bar { border-radius: 2px !important; }
+    /* 信息面板 - 极致单行 */
     .score-panel {
       flex-wrap: nowrap !important; gap: 0 !important;
-      padding: 2px 4px !important; margin-bottom: 2px !important;
-      border-radius: 12px !important;
+      padding: 1px 6px !important; margin: 1px 0 !important;
+      border-radius: 10px !important;
     }
     .score-item {
-      padding: 1px 4px !important; font-size: 0.6rem !important;
+      padding: 0 5px !important; font-size: 0.6rem !important;
       gap: 1px !important; flex-shrink: 1; min-width: 0;
     }
-    .score-item .label { font-size: 0.55rem !important; overflow: hidden; max-width: 1.2em; text-overflow: clip; }
-    .score-item .value { font-size: 0.68rem !important; margin-left: 1px !important; }
+    /* 手机上只显示emoji图标，隐藏中文标签 */
+    .score-item .label {
+      font-size: 0.6rem !important; overflow: hidden;
+      max-width: 1.1em; text-overflow: clip;
+    }
+    .score-item .value { font-size: 0.7rem !important; margin-left: 1px !important; }
     /* 棋盘最大化 */
-    .board-frame { padding: 0 !important; }
-    #game-board { padding: 4px !important; border-radius: 12px !important; }
-    #link-canvas, #particle-canvas { top: 4px !important; left: 4px !important; }
+    .board-frame { padding: 0 !important; margin: 0 !important; }
+    #game-board { padding: 3px !important; border-radius: 10px !important; }
+    #link-canvas, #particle-canvas { top: 3px !important; left: 3px !important; }
     .tile-label { flex: 0 0 12% !important; padding: 0 1px !important; }
     .tile-label span { font-size: 0.38rem !important; letter-spacing: 0 !important; }
-    .tile { border-radius: 12px !important; border-width: 2px !important; }
-    /* 按钮区域 - 紧凑网格 */
+    .tile { border-radius: 10px !important; border-width: 2px !important; }
+    /* 按钮区域 - 一行图标按钮 */
     .btn-bar {
-      margin-top: 3px !important;
-      display: grid !important;
-      grid-template-columns: repeat(5, 1fr) !important;
-      gap: 3px !important;
-      width: 100% !important;
-      max-width: calc(100vw - 16px) !important;
-      padding: 0 8px !important;
+      margin: 2px 0 0 0 !important;
+      display: flex !important;
+      justify-content: center !important;
+      gap: 4px !important;
+      width: auto !important;
+      padding: 0 4px !important;
+      flex-wrap: nowrap !important;
     }
     .btn-bar button {
-      padding: 5px 2px !important; font-size: 0.58rem !important;
-      border-radius: 12px !important; letter-spacing: 0 !important;
+      padding: 4px 6px !important; font-size: 0.6rem !important;
+      border-radius: 10px !important; letter-spacing: 0 !important;
       white-space: nowrap !important;
+      flex: 0 0 auto !important;
     }
     .btn-bar button .btn-count {
-      padding: 0 2px !important; font-size: 0.55rem !important;
+      padding: 0 2px !important; font-size: 0.5rem !important;
       margin-left: 1px !important;
     }
   }
+  /* 超小屏幕进一步压缩 */
   @media (max-width: 480px) {
-    .title-banner h1 { font-size: 1.4rem !important; }
-    .score-item { padding: 1px 4px !important; font-size: 0.58rem !important; }
-    .score-item .label { font-size: 0.52rem !important; }
-    .score-item .value { font-size: 0.65rem !important; }
-    .btn-bar button { padding: 5px 2px !important; font-size: 0.58rem !important; }
+    .title-banner h1 { font-size: 1rem !important; }
+    .score-item { padding: 0 3px !important; font-size: 0.55rem !important; }
+    .score-item .value { font-size: 0.62rem !important; }
+    .btn-bar button { padding: 3px 5px !important; font-size: 0.55rem !important; }
+  }
+  /* 横屏模式特殊处理 */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .title-banner { display: none !important; }
+    .timer-bar-container { height: 3px !important; margin: 0 !important; }
+    .score-panel { padding: 0 4px !important; margin: 0 !important; }
+    .btn-bar { margin: 1px 0 0 0 !important; }
+    .btn-bar button { padding: 2px 4px !important; font-size: 0.5rem !important; }
   }
 </style>
 </head>
@@ -792,11 +821,12 @@ function calculateBoardSize() {
     const levelCols = levelConfig.cols;
     const levelRows = levelConfig.rows;
     
-    // 棋盘可用区域：屏幕高度的78%给棋盘（剩余22%给Logo+面板+按钮）
-    // 这个比例在各种手机上都能保证棋盘最大化且不溢出
-    const boardRatio = 0.78;
-    const availableHeight = Math.floor(screenHeight * boardRatio);
-    const availableWidth = screenWidth - 12; // 左右各留6px
+    // 使用dvh（动态视口高度）排除浏览器地址栏
+    // 非棋盘区域固定预算：Logo(22px) + 进度条(6px) + 面板(22px) + 按钮(28px) + 间距(12px) = ~90px
+    const isLandscape = screenWidth > screenHeight;
+    const headerBudget = isLandscape ? 40 : 90;
+    const availableHeight = screenHeight - headerBudget;
+    const availableWidth = screenWidth - 8; // 左右各留4px
     
     // 分别按宽度和高度计算最大格子大小
     const cellByWidth = Math.floor(availableWidth / levelCols);
@@ -805,8 +835,8 @@ function calculateBoardSize() {
     // 取较小值，确保棋盘完全可见
     const calculatedCellSize = Math.min(cellByWidth, cellByHeight);
     
-    // 放宽上限到130px，让小关卡的格子更大更清晰
-    TILE_SIZE = Math.max(36, Math.min(130, calculatedCellSize - 3));
+    // 放宽上限到150px，让小关卡的格子更大更清晰
+    TILE_SIZE = Math.max(36, Math.min(150, calculatedCellSize - 2));
     GAP = Math.max(2, Math.min(4, Math.floor(TILE_SIZE * 0.04)));
     CELL = TILE_SIZE + GAP;
   } else {
@@ -1472,12 +1502,12 @@ function resizeBoardContainer() {
   const boardW = INNER_COLS * CELL + GAP;
   const boardH = INNER_ROWS * CELL + GAP;
   const isMobile = window.innerWidth <= 768;
-  const pad = isMobile ? 8 : 16;
+  const pad = isMobile ? 6 : 16;
   
   // 确保棋盘不会超出屏幕
-  const maxWidth = window.innerWidth - (isMobile ? 12 : 40);
-  // 移动端不再二次限制高度，calculateBoardSize已经用78%比例控制了
-  const maxHeight = isMobile ? (boardH + pad + 10) : (window.innerHeight - 200);
+  const maxWidth = window.innerWidth - (isMobile ? 8 : 40);
+  // 移动端不限制高度，calculateBoardSize已经精确控制了
+  const maxHeight = isMobile ? (boardH + pad + 4) : (window.innerHeight - 200);
   
   const finalWidth = Math.min(boardW + pad, maxWidth);
   const finalHeight = Math.min(boardH + pad, maxHeight);
@@ -1493,9 +1523,16 @@ function resizeBoardContainer() {
   particleCanvas.height = boardH;
   
   // 计时器和分数面板宽度跟随棋盘
-  const panelW = Math.min(Math.max(boardW + pad, isMobile ? 200 : 300), maxWidth);
-  document.querySelector('.timer-bar-container').style.width = panelW + 'px';
-  document.querySelector('.score-panel').style.width = panelW + 'px';
+  if (isMobile) {
+    // 移动端面板宽度跟随棋盘宽度，不超过屏幕
+    const panelW = Math.min(finalWidth + 8, maxWidth);
+    document.querySelector('.timer-bar-container').style.width = panelW + 'px';
+    document.querySelector('.score-panel').style.width = panelW + 'px';
+  } else {
+    const panelW = Math.min(Math.max(boardW + pad, 300), maxWidth);
+    document.querySelector('.timer-bar-container').style.width = panelW + 'px';
+    document.querySelector('.score-panel').style.width = panelW + 'px';
+  }
   
   // 刷新所有sprite定位
   setTimeout(refreshAllSprites, 100);
