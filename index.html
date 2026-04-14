@@ -664,34 +664,34 @@
   }
   /* Responsive - 移动端全面优化 */
   @media (max-width: 768px) {
-    body { justify-content: flex-start; padding-top: 4px; }
+    body { justify-content: flex-start; padding-top: 2px; overflow-y: auto; }
     /* Logo 压缩为单行小尺寸 */
-    .title-banner { margin-bottom: 0px; }
+    .title-banner { margin-bottom: 0px; margin-top: 0px; }
     .title-banner h1 {
-      font-size: 1.6rem !important; line-height: 1.1 !important;
+      font-size: 1.4rem !important; line-height: 1 !important;
       -webkit-text-stroke: 1.5px rgba(255,255,255,0.95) !important;
+      margin-bottom: 0 !important;
     }
     .title-banner h1 br { display: none; }
-    .title-banner .logo-deco { font-size: 1.2rem !important; }
-    .title-banner .logo-deco.left { left: -18px !important; }
-    .title-banner .logo-deco.right { right: -18px !important; }
-    .subtitle { font-size: 0.6rem !important; margin-bottom: 2px !important; letter-spacing: 1.5px !important; }
+    .title-banner .logo-deco { font-size: 1rem !important; }
+    .title-banner .logo-deco.left { left: -14px !important; }
+    .title-banner .logo-deco.right { right: -14px !important; }
+    .subtitle { font-size: 0.55rem !important; margin-bottom: 1px !important; letter-spacing: 1px !important; margin-top: 0 !important; }
     /* 进度条压缩 */
-    .timer-bar-container { height: 8px !important; margin-bottom: 3px !important; border-radius: 6px !important; }
-    .timer-bar { border-radius: 4px !important; }
+    .timer-bar-container { height: 6px !important; margin-bottom: 2px !important; border-radius: 4px !important; }
+    .timer-bar { border-radius: 3px !important; }
     /* 信息面板 - 单行紧凑横排 */
     .score-panel {
       flex-wrap: nowrap !important; gap: 0 !important;
-      padding: 3px 6px !important; margin-bottom: 4px !important;
-      border-radius: 16px !important;
+      padding: 2px 4px !important; margin-bottom: 2px !important;
+      border-radius: 12px !important;
     }
     .score-item {
-      padding: 1px 6px !important; font-size: 0.62rem !important;
+      padding: 1px 4px !important; font-size: 0.6rem !important;
       gap: 1px !important; flex-shrink: 1; min-width: 0;
     }
-    .score-item .label { font-size: 0.58rem !important; }
-    .score-item .label { overflow: hidden; max-width: 1.2em; text-overflow: clip; }
-    .score-item .value { font-size: 0.7rem !important; margin-left: 1px !important; }
+    .score-item .label { font-size: 0.55rem !important; overflow: hidden; max-width: 1.2em; text-overflow: clip; }
+    .score-item .value { font-size: 0.68rem !important; margin-left: 1px !important; }
     /* 棋盘最大化 */
     .board-frame { padding: 0 !important; }
     #game-board { padding: 4px !important; border-radius: 12px !important; }
@@ -701,21 +701,21 @@
     .tile { border-radius: 12px !important; border-width: 2px !important; }
     /* 按钮区域 - 紧凑网格 */
     .btn-bar {
-      margin-top: 4px !important;
+      margin-top: 3px !important;
       display: grid !important;
       grid-template-columns: repeat(5, 1fr) !important;
-      gap: 4px !important;
+      gap: 3px !important;
       width: 100% !important;
-      max-width: calc(100vw - 20px) !important;
-      padding: 0 10px !important;
+      max-width: calc(100vw - 16px) !important;
+      padding: 0 8px !important;
     }
     .btn-bar button {
-      padding: 6px 4px !important; font-size: 0.62rem !important;
-      border-radius: 14px !important; letter-spacing: 0 !important;
+      padding: 5px 2px !important; font-size: 0.58rem !important;
+      border-radius: 12px !important; letter-spacing: 0 !important;
       white-space: nowrap !important;
     }
     .btn-bar button .btn-count {
-      padding: 0 3px !important; font-size: 0.58rem !important;
+      padding: 0 2px !important; font-size: 0.55rem !important;
       margin-left: 1px !important;
     }
   }
@@ -792,22 +792,40 @@ function calculateBoardSize() {
     const levelCols = levelConfig.cols;
     const levelRows = levelConfig.rows;
     
-    // 计算非棋盘区域占用的高度（Logo+信息面板+按钮+边距）
-    // Logo ~40px, subtitle ~14px, timer ~11px, score-panel ~28px, btn-bar ~38px, margins ~20px
-    const headerHeight = 40 + 14 + 11 + 28 + 38 + 20;
+    // 精确测量非棋盘区域实际占用的高度
+    // 通过DOM实际测量，如果DOM还没渲染则用估算值
+    let headerHeight = 0;
+    const titleBanner = document.querySelector('.title-banner');
+    const subtitle = document.querySelector('.subtitle');
+    const timerBar = document.querySelector('.timer-bar-container');
+    const scorePanel = document.querySelector('.score-panel');
+    const btnBar = document.querySelector('.btn-bar');
+    
+    if (titleBanner && scorePanel) {
+      headerHeight = (titleBanner.offsetHeight || 30)
+        + (subtitle ? subtitle.offsetHeight || 0 : 0)
+        + (timerBar ? timerBar.offsetHeight || 8 : 8)
+        + (scorePanel.offsetHeight || 28)
+        + (btnBar ? btnBar.offsetHeight || 34 : 34)
+        + 24; // margins总和
+    } else {
+      // DOM未渲染时的保守估算
+      headerHeight = 110;
+    }
+    
     const availableHeight = screenHeight - headerHeight;
-    const availableWidth = screenWidth - 20; // 左右各留10px
+    const availableWidth = screenWidth - 16; // 左右各留8px
     
     // 分别按宽度和高度计算最大格子大小
-    const cellByWidth = Math.floor((availableWidth - 8) / levelCols); // 8=padding
+    const cellByWidth = Math.floor((availableWidth - 8) / levelCols);
     const cellByHeight = Math.floor((availableHeight - 8) / levelRows);
     
     // 取较小值，确保棋盘完全可见
     const calculatedCellSize = Math.min(cellByWidth, cellByHeight);
     
-    // 确保格子大小在合理范围内（最小36px保证可点击，最大90px）
-    TILE_SIZE = Math.max(36, Math.min(90, calculatedCellSize - 4));
-    GAP = Math.max(3, Math.min(5, Math.floor(TILE_SIZE * 0.06)));
+    // 放宽上限到120px，让小关卡的格子更大更清晰
+    TILE_SIZE = Math.max(36, Math.min(120, calculatedCellSize - 3));
+    GAP = Math.max(2, Math.min(5, Math.floor(TILE_SIZE * 0.05)));
     CELL = TILE_SIZE + GAP;
   } else {
     // 桌面端使用默认尺寸
@@ -1475,8 +1493,8 @@ function resizeBoardContainer() {
   const pad = isMobile ? 8 : 16;
   
   // 确保棋盘不会超出屏幕
-  const maxWidth = window.innerWidth - (isMobile ? 20 : 40);
-  const maxHeight = window.innerHeight - (isMobile ? 160 : 200);
+  const maxWidth = window.innerWidth - (isMobile ? 16 : 40);
+  const maxHeight = window.innerHeight - (isMobile ? 100 : 200);
   
   const finalWidth = Math.min(boardW + pad, maxWidth);
   const finalHeight = Math.min(boardH + pad, maxHeight);
