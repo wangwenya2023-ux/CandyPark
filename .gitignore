@@ -1,0 +1,17 @@
+# Unity packages
+*.unitypackage
+
+# Temp files
+*.tmp
+*.bak
+
+# Build scripts
+build_neon.ps1
+extract_neon.ps1
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Extracted assets not used in web
+assets/neon/

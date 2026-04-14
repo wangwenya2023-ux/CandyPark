@@ -1,582 +1,340 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🍭 Candy Park · Tap, Listen & Match</title>
-<!-- Google Fonts: Fredoka One (title) + Nunito (body) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🍭 Candy Park · Neon Edition</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
   :root {
-    /* Candy Park Palette - warm, harmonious, soft */
-    --bg-top: #fce4ec;
-    --bg-mid: #f8bbd0;
-    --bg-bot: #f48fb1;
-    --cream: #fff8e7;
-    --cream-dark: #f5e6c8;
-    --board-bg: #fef9f0;
-    --board-border: #e8c896;
-    --board-shadow: #d4a96a;
-    --text-dark: #5d4037;
-    --text-warm: #8d6e63;
-    --gold: #ff69b4;
-    --gold-dark: #f06292;
-    --pink-soft: #f48fb1;
-    --green-soft: #a5d6a7;
-    --blue-soft: #90caf9;
+    --neon-pink: #ff2d95;
+    --neon-blue: #00d4ff;
+    --neon-purple: #b44dff;
+    --neon-green: #39ff14;
+    --neon-orange: #ff6b35;
+    --neon-yellow: #ffe66d;
+    --dark-bg: #0a0a1a;
+    --dark-panel: rgba(15, 15, 35, 0.85);
+    --glass-bg: rgba(255, 255, 255, 0.06);
+    --glass-border: rgba(255, 255, 255, 0.12);
+    --text-light: #e8e8f0;
+    --text-dim: rgba(255, 255, 255, 0.5);
+    --board-bg: rgba(20, 15, 40, 0.7);
   }
-
   body {
-    background: url('1776064614442642.png') center center / cover no-repeat fixed;
-    background-color: #f8bbd0; /* 图片加载前的底色 */
+    background: var(--dark-bg);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-family: 'Nunito', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    font-family: 'Nunito', 'Segoe UI', sans-serif;
     overflow: hidden;
     position: relative;
+    color: var(--text-light);
   }
-
-  /* ===== Candy Park Background Overlay ===== */
   body::before {
     content: '';
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
-    /* 轻微的半透明叠加，让背景图和UI更融合 */
-    background: radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.08) 100%);
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(180, 77, 255, 0.15) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(255, 45, 149, 0.12) 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, rgba(0, 212, 255, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+    animation: bgPulse 8s ease-in-out infinite alternate;
+  }
+  @keyframes bgPulse { 0% { opacity: 0.8; } 100% { opacity: 1; } }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
     pointer-events: none;
     z-index: 0;
   }
-
-  /* Floating candy decorations - 背景图已有装饰，隐藏emoji */
-  .deco {
-    display: none;
-  }
-
-  /* ===== Title Banner - 参考设计稿的卡通Logo ===== */
+  .deco { display: none; }
   .title-banner {
-    position: relative;
-    z-index: 1;
-    margin-bottom: 2px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0;
+    position: relative; z-index: 1; margin-bottom: 4px;
+    display: flex; flex-direction: column; align-items: center;
   }
-
-  /* 不使用UI框背景，Logo直接浮在背景上 */
-  .title-banner::before {
-    display: none;
-  }
-
-  /* Logo文字容器 */
+  .title-banner::before { display: none; }
   .title-banner h1 {
     font-family: 'Fredoka One', cursive;
-    font-size: 3.2rem;
-    line-height: 1.05;
-    letter-spacing: 3px;
-    text-align: center;
-    /* 粉色到浅蓝的渐变 — 模仿参考图 */
-    background: linear-gradient(180deg, #ffb6d9 0%, #f48fb1 35%, #e991c5 55%, #c5a3d9 75%, #a8d8ea 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    /* 白色粗描边 — 卡通立体感 */
-    -webkit-text-stroke: 3px rgba(255,255,255,0.95);
-    paint-order: stroke fill;
-    text-shadow: none;
-    /* 多层阴影：深色外阴影 + 柔和光晕 */
-    filter:
-      drop-shadow(0 3px 0 rgba(180,120,160,0.5))
-      drop-shadow(0 6px 12px rgba(180,100,140,0.3))
-      drop-shadow(0 0 24px rgba(255,182,217,0.4));
+    font-size: 3rem; line-height: 1.05; letter-spacing: 4px; text-align: center;
+    background: linear-gradient(135deg, var(--neon-pink) 0%, var(--neon-purple) 40%, var(--neon-blue) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 20px rgba(255,45,149,0.5)) drop-shadow(0 0 40px rgba(180,77,255,0.3));
+    animation: titleGlow 3s ease-in-out infinite alternate;
   }
-
-  /* 棒棒糖装饰 */
+  @keyframes titleGlow {
+    0% { filter: drop-shadow(0 0 20px rgba(255,45,149,0.5)) drop-shadow(0 0 40px rgba(180,77,255,0.3)); }
+    100% { filter: drop-shadow(0 0 30px rgba(255,45,149,0.7)) drop-shadow(0 0 60px rgba(0,212,255,0.4)); }
+  }
   .title-banner .logo-deco {
-    position: absolute;
-    font-size: 2rem;
-    z-index: 2;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
-    pointer-events: none;
+    position: absolute; font-size: 1.8rem; z-index: 2;
+    filter: drop-shadow(0 0 10px rgba(255,45,149,0.6)); pointer-events: none;
   }
-  .title-banner .logo-deco.left {
-    left: -28px;
-    top: 50%;
-    transform: translateY(-50%) rotate(-15deg);
-  }
-  .title-banner .logo-deco.right {
-    right: -28px;
-    top: 50%;
-    transform: translateY(-50%) rotate(15deg) scaleX(-1);
-  }
-
+  .title-banner .logo-deco.left { left: -24px; top: 50%; transform: translateY(-50%) rotate(-15deg); }
+  .title-banner .logo-deco.right { right: -24px; top: 50%; transform: translateY(-50%) rotate(15deg) scaleX(-1); }
   .subtitle {
-    font-family: 'Nunito', sans-serif;
-    color: #fff;
-    margin-bottom: 6px;
-    font-size: 1.05rem;
-    font-weight: 800;
-    z-index: 1;
-    text-shadow:
-      0 2px 0 rgba(160,100,140,0.4),
-      0 2px 8px rgba(0,0,0,0.2),
-      0 0 16px rgba(255,182,217,0.3);
-    letter-spacing: 2.5px;
+    font-family: 'Nunito', sans-serif; color: var(--neon-blue);
+    margin-bottom: 6px; font-size: 0.95rem; font-weight: 800; z-index: 1;
+    text-shadow: 0 0 10px rgba(0,212,255,0.5); letter-spacing: 3px; text-transform: uppercase;
   }
-
-  /* ===== Timer Bar ===== */
+  /* Timer Bar - Neon */
   .timer-bar-container {
-    width: auto;
-    height: 14px;
-    background: rgba(255,255,255,0.5);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    border: 1.5px solid rgba(255,255,255,0.6);
-    border-radius: 10px;
-    margin-bottom: 8px;
-    overflow: hidden;
-    z-index: 1;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    width: auto; height: 14px;
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; margin-bottom: 8px; overflow: hidden; z-index: 1;
+    box-shadow: 0 0 15px rgba(0,212,255,0.1);
   }
-
   .timer-bar {
     height: 100%;
-    background: linear-gradient(90deg, #f8bbd0 0%, #f48fb1 50%, #f06292 100%);
-    border-radius: 7px;
-    transition: width 0.5s linear;
-    width: 100%;
-    box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
+    background: linear-gradient(90deg, var(--neon-blue) 0%, var(--neon-purple) 50%, var(--neon-pink) 100%);
+    border-radius: 7px; transition: width 0.5s linear; width: 100%;
+    box-shadow: 0 0 10px rgba(0,212,255,0.4), inset 0 1px 0 rgba(255,255,255,0.2);
   }
-
   .timer-bar.danger {
-    background: linear-gradient(90deg, #ef9a9a 0%, #ef5350 50%, #e53935 100%);
+    background: linear-gradient(90deg, var(--neon-orange) 0%, #ff1744 50%, #d50000 100%);
     animation: timerPulse 0.6s ease infinite;
+    box-shadow: 0 0 15px rgba(255,23,68,0.5);
   }
-
-  @keyframes timerPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.65; }
-  }
-
-  /* ===== Score Panel - 整体白色半透明圆角条 ===== */
+  @keyframes timerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.65; } }
+  /* Score Panel - Glass Neon */
   .score-panel {
-    display: flex;
-    gap: 0;
-    margin-bottom: 8px;
-    z-index: 1;
-    justify-content: center;
-    flex-wrap: nowrap;
-    background: rgba(255,255,255,0.75);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-radius: 28px;
-    padding: 6px 10px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
-    border: 1.5px solid rgba(255,255,255,0.6);
+    display: flex; gap: 0; margin-bottom: 8px; z-index: 1;
+    justify-content: center; flex-wrap: nowrap;
+    background: var(--dark-panel);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border-radius: 28px; padding: 6px 10px;
+    box-shadow: 0 0 20px rgba(180,77,255,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
   }
-
   .score-item {
-    background: transparent;
-    border: none;
-    border-radius: 0;
-    padding: 4px 14px;
-    color: var(--text-dark);
-    font-size: 0.85rem;
-    font-weight: 800;
-    box-shadow: none;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    border-right: 1.5px solid rgba(0,0,0,0.08);
+    background: transparent; border: none; border-radius: 0;
+    padding: 4px 14px; color: var(--text-light);
+    font-size: 0.85rem; font-weight: 800;
+    box-shadow: none; display: flex; align-items: center; gap: 2px;
+    border-right: 1px solid rgba(255,255,255,0.08);
   }
-
-  .score-item:last-child {
-    border-right: none;
-  }
-
-  .score-item .label {
-    opacity: 0.65;
-    font-weight: 700;
-    font-size: 0.78rem;
-  }
-
+  .score-item:last-child { border-right: none; }
+  .score-item .label { opacity: 0.5; font-weight: 700; font-size: 0.78rem; }
   .score-item .value {
-    color: #e91e63;
-    font-family: 'Fredoka One', cursive;
-    font-size: 1rem;
-    margin-left: 3px;
+    color: var(--neon-pink); font-family: 'Fredoka One', cursive;
+    font-size: 1rem; margin-left: 3px;
+    text-shadow: 0 0 8px rgba(255,45,149,0.4);
   }
-
-  /* ===== Game Board - 完全不透明实色背景 ===== */
+  /* Game Board - Dark Neon */
   #game-board {
-    position: relative;
-    border-radius: 16px;
-    background: #fdeef4;
-    overflow: visible;
-    z-index: 20;
-    padding: 8px;
-    /* 触控优化：棋盘区域全局消除延迟 */
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
-    cursor: pointer;
-    /* 响应式适配：最大宽度限制 */
-    max-width: 100vw;
-    box-sizing: border-box;
+    position: relative; border-radius: 16px;
+    background: var(--board-bg);
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    overflow: visible; z-index: 20; padding: 8px;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none; user-select: none; cursor: pointer;
+    max-width: 100vw; box-sizing: border-box;
+    border: 1px solid rgba(180,77,255,0.2);
+    box-shadow: 0 0 30px rgba(180,77,255,0.1), 0 0 60px rgba(0,212,255,0.05);
   }
-
-  /* Subtle inner border - 已移除（棋盘透明，无需内边框） */
-
-  /* ===== UI框装饰容器 ===== */
-  .board-frame {
-    position: relative;
-    display: inline-block;
-    padding: 0;
-    background: none;
-  }
-
-  /* ===== Tiles - Soft candy pastels ===== */
+  .board-frame { position: relative; display: inline-block; padding: 0; background: none; }
+  /* Tiles - Neon Candy */
   .tile {
-    position: absolute;
-    cursor: pointer;
+    position: absolute; cursor: pointer;
     transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, filter 0.1s ease;
-    border-radius: 18px;
-    border: 3px solid transparent;
-    overflow: hidden;          /* 正常状态裁切圆角，弹出时由class覆盖 */
-    z-index: 1;
-    will-change: transform;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    /* 触控优化：消除延迟、禁止选中、去掉默认高亮 */
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
+    border-radius: 16px; border: 2px solid transparent;
+    overflow: hidden; z-index: 1; will-change: transform;
+    display: flex; flex-direction: column; align-items: stretch;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
-
-  /* 9 harmonious candy colors - soft pastels with gentle contrast */
   .tile[data-type="0"] {
-    /* Strawberry Pink */
-    border-color: #f06292;
-    background: linear-gradient(145deg, #f8a4c0 0%, #f06292 50%, #e04878 100%);
-    box-shadow: 0 3px 8px rgba(240,98,146,0.35);
+    border-color: var(--neon-pink);
+    background: linear-gradient(145deg, rgba(255,45,149,0.3) 0%, rgba(255,45,149,0.15) 100%);
+    box-shadow: 0 0 12px rgba(255,45,149,0.3), inset 0 0 12px rgba(255,45,149,0.1);
   }
   .tile[data-type="1"] {
-    /* Tangerine Orange */
-    border-color: #ffb74d;
-    background: linear-gradient(145deg, #ffd699 0%, #ffb74d 50%, #ffa726 100%);
-    box-shadow: 0 3px 8px rgba(255,183,77,0.35);
+    border-color: var(--neon-orange);
+    background: linear-gradient(145deg, rgba(255,107,53,0.3) 0%, rgba(255,107,53,0.15) 100%);
+    box-shadow: 0 0 12px rgba(255,107,53,0.3), inset 0 0 12px rgba(255,107,53,0.1);
   }
   .tile[data-type="2"] {
-    /* Mint Candy - 薄荷糖奶绿，去掉实心按钮感 */
-    border-color: #a8d8b0;
-    background: linear-gradient(145deg, #d4eedb 0%, #b8dfc0 50%, #9ecfaa 100%);
-    box-shadow: 0 3px 8px rgba(158,207,170,0.32);
+    border-color: var(--neon-green);
+    background: linear-gradient(145deg, rgba(57,255,20,0.25) 0%, rgba(57,255,20,0.1) 100%);
+    box-shadow: 0 0 12px rgba(57,255,20,0.3), inset 0 0 12px rgba(57,255,20,0.1);
   }
   .tile[data-type="3"] {
-    /* Blueberry */
-    border-color: #64b5f6;
-    background: linear-gradient(145deg, #a3d5ff 0%, #64b5f6 50%, #42a5f5 100%);
-    box-shadow: 0 3px 8px rgba(100,181,246,0.35);
+    border-color: var(--neon-blue);
+    background: linear-gradient(145deg, rgba(0,212,255,0.3) 0%, rgba(0,212,255,0.15) 100%);
+    box-shadow: 0 0 12px rgba(0,212,255,0.3), inset 0 0 12px rgba(0,212,255,0.1);
   }
   .tile[data-type="4"] {
-    /* Grape Purple */
-    border-color: #ba68c8;
-    background: linear-gradient(145deg, #d7a0e0 0%, #ba68c8 50%, #ab47bc 100%);
-    box-shadow: 0 3px 8px rgba(186,104,200,0.35);
+    border-color: var(--neon-purple);
+    background: linear-gradient(145deg, rgba(180,77,255,0.3) 0%, rgba(180,77,255,0.15) 100%);
+    box-shadow: 0 0 12px rgba(180,77,255,0.3), inset 0 0 12px rgba(180,77,255,0.1);
   }
   .tile[data-type="5"] {
-    /* Bubblegum Rose */
-    border-color: #f48fb1;
-    background: linear-gradient(145deg, #f8bbd0 0%, #f48fb1 50%, #ec407a 100%);
-    box-shadow: 0 3px 8px rgba(244,143,177,0.35);
+    border-color: #ff69b4;
+    background: linear-gradient(145deg, rgba(255,105,180,0.3) 0%, rgba(255,105,180,0.15) 100%);
+    box-shadow: 0 0 12px rgba(255,105,180,0.3), inset 0 0 12px rgba(255,105,180,0.1);
   }
   .tile[data-type="6"] {
-    /* Cotton Candy Cyan */
-    border-color: #4dd0e1;
-    background: linear-gradient(145deg, #99e5ed 0%, #4dd0e1 50%, #26c6da 100%);
-    box-shadow: 0 3px 8px rgba(77,208,225,0.35);
+    border-color: #00e5ff;
+    background: linear-gradient(145deg, rgba(0,229,255,0.3) 0%, rgba(0,229,255,0.15) 100%);
+    box-shadow: 0 0 12px rgba(0,229,255,0.3), inset 0 0 12px rgba(0,229,255,0.1);
   }
   .tile[data-type="7"] {
-    /* Lemon Yellow */
-    border-color: #ffd54f;
-    background: linear-gradient(145deg, #ffe88a 0%, #ffd54f 50%, #ffca28 100%);
-    box-shadow: 0 3px 8px rgba(255,213,79,0.35);
+    border-color: var(--neon-yellow);
+    background: linear-gradient(145deg, rgba(255,230,109,0.3) 0%, rgba(255,230,109,0.15) 100%);
+    box-shadow: 0 0 12px rgba(255,230,109,0.3), inset 0 0 12px rgba(255,230,109,0.1);
   }
   .tile[data-type="8"] {
-    /* Peach Coral */
-    border-color: #ff8a65;
-    background: linear-gradient(145deg, #ffb89a 0%, #ff8a65 50%, #ff7043 100%);
-    box-shadow: 0 3px 8px rgba(255,138,101,0.35);
+    border-color: #ff6e40;
+    background: linear-gradient(145deg, rgba(255,110,64,0.3) 0%, rgba(255,110,64,0.15) 100%);
+    box-shadow: 0 0 12px rgba(255,110,64,0.3), inset 0 0 12px rgba(255,110,64,0.1);
   }
-
-  /* Candy shine - 柔和的光泽效果 */
+  /* Neon shine effect */
   .tile::before {
     content: '';
-    position: absolute;
-    top: 3px; left: 10%;
-    width: 80%; height: 18%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 60%, transparent 100%);
-    border-radius: 10px 10px 50% 50%;
-    pointer-events: none;
-    z-index: 20;
+    position: absolute; top: 2px; left: 10%; width: 80%; height: 16%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+    border-radius: 10px 10px 50% 50%; pointer-events: none; z-index: 20;
   }
-
   .tile:hover {
-    transform: scale(1.11) translateY(-3px);
-    z-index: 10;
-    filter: brightness(1.05) saturate(1.10);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
+    transform: scale(1.11) translateY(-3px); z-index: 10;
+    filter: brightness(1.2) saturate(1.2);
   }
-
-  /* 鼠标悬停时切换为动态表情图 */
-  .tile:hover .emoji-sprite {
-    background-image: url('1776060717188131.png') !important;
-  }
-
+  .tile:hover .emoji-sprite { background-image: url('1776060717188131.png') !important; }
   .tile.selected {
     border-color: #fff !important;
     box-shadow:
-      0 0 0 3px #ff69b4,
-      0 0 18px 4px rgba(255,105,180,0.45),
-      0 0 36px 8px rgba(255,105,180,0.15),
-      0 8px 24px rgba(0,0,0,0.15) !important;
-    transform: scale(1.18) translateY(-6px);
-    z-index: 20;
-    filter: brightness(1.08) saturate(1.15) drop-shadow(0 0 6px rgba(255,105,180,0.4));
+      0 0 0 2px var(--neon-pink),
+      0 0 20px 4px rgba(255,45,149,0.5),
+      0 0 40px 8px rgba(255,45,149,0.2),
+      0 8px 24px rgba(0,0,0,0.3) !important;
+    transform: scale(1.18) translateY(-6px); z-index: 20;
+    filter: brightness(1.15) saturate(1.2);
     animation: selectedPulse 0.7s ease-in-out infinite;
   }
-
-  /* 选中时也保持动态表情图 */
-  .tile.selected .emoji-sprite {
-    background-image: url('1776060717188131.png') !important;
-  }
-
+  .tile.selected .emoji-sprite { background-image: url('1776060717188131.png') !important; }
   @keyframes selectedPulse {
     0%, 100% {
       transform: scale(1.18) translateY(-6px);
-      box-shadow:
-        0 0 0 3px #ff69b4,
-        0 0 18px 4px rgba(255,105,180,0.45),
-        0 0 36px 8px rgba(255,105,180,0.15),
-        0 8px 24px rgba(0,0,0,0.15) !important;
+      box-shadow: 0 0 0 2px var(--neon-pink), 0 0 20px 4px rgba(255,45,149,0.5), 0 0 40px 8px rgba(255,45,149,0.2), 0 8px 24px rgba(0,0,0,0.3) !important;
     }
     50% {
       transform: scale(1.13) translateY(-4px);
-      box-shadow:
-        0 0 0 2.5px #ff69b4,
-        0 0 12px 2px rgba(255,105,180,0.30),
-        0 0 24px 4px rgba(255,105,180,0.10),
-        0 5px 16px rgba(0,0,0,0.10) !important;
+      box-shadow: 0 0 0 2px var(--neon-pink), 0 0 12px 2px rgba(255,45,149,0.3), 0 0 24px 4px rgba(255,45,149,0.1), 0 5px 16px rgba(0,0,0,0.2) !important;
     }
   }
-
-  .tile:active {
-    transform: scale(0.88) !important;
-    transition-duration: 0.04s !important;
-    filter: brightness(0.92) !important;
-  }
-
-  .tile.matched {
-    animation: candyPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-
+  .tile:active { transform: scale(0.88) !important; transition-duration: 0.04s !important; filter: brightness(0.85) !important; }
+  .tile.matched { animation: candyPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
   @keyframes candyPop {
-    0%   { transform: scale(1.0);  opacity: 1;   filter: brightness(1); }
-    15%  { transform: scale(1.20) rotate(3deg);  opacity: 1;   filter: brightness(1.15) saturate(1.2); }
-    30%  { transform: scale(1.30) rotate(-2deg); opacity: 0.85; filter: brightness(1.10) saturate(1.1); }
-    55%  { transform: scale(1.20) rotate(1deg);  opacity: 0.5; filter: brightness(1.05); }
-    100% { transform: scale(0)    rotate(8deg);  opacity: 0;   filter: brightness(1); }
+    0%   { transform: scale(1.0); opacity: 1; filter: brightness(1); }
+    15%  { transform: scale(1.20) rotate(3deg); opacity: 1; filter: brightness(1.3) saturate(1.3); }
+    30%  { transform: scale(1.30) rotate(-2deg); opacity: 0.85; filter: brightness(1.2); }
+    55%  { transform: scale(1.20) rotate(1deg); opacity: 0.5; }
+    100% { transform: scale(0) rotate(8deg); opacity: 0; }
   }
-
-  /* ===== 卡片内部结构 ===== */
-
-  /* 头像区：占卡片上方 84%，表情是主视觉 */
+  /* Tile inner structure */
   .tile-avatar {
-    flex: 0 0 84%;
-    position: relative;
-    overflow: hidden;
-    background: rgba(255,255,255,0.08);
-    transition: overflow 0s;
+    flex: 0 0 84%; position: relative; overflow: hidden;
+    background: rgba(255,255,255,0.03); transition: overflow 0s;
   }
-
-  /* ===== 表情弹出效果：匹配时表情跳出卡片框（带精致边框装饰） ===== */
-  .tile.emoji-pop-out,
-  .tile.emoji-pop-out-first,
-  .tile.emoji-match-celebrate {
-    overflow: visible !important;
-  }
+  .tile.emoji-pop-out, .tile.emoji-pop-out-first, .tile.emoji-match-celebrate { overflow: visible !important; }
   .tile.emoji-pop-out { z-index: 50 !important; }
   .tile.emoji-pop-out-first { z-index: 45 !important; }
   .tile.emoji-match-celebrate { z-index: 55 !important; }
-
-  .tile.emoji-pop-out .tile-avatar,
-  .tile.emoji-pop-out-first .tile-avatar,
-  .tile.emoji-match-celebrate .tile-avatar {
-    overflow: visible !important;
+  .tile.emoji-pop-out .tile-avatar, .tile.emoji-pop-out-first .tile-avatar, .tile.emoji-match-celebrate .tile-avatar { overflow: visible !important; }
+  .tile.emoji-pop-out .emoji-sprite, .tile.emoji-pop-out-first .emoji-sprite {
+    border-radius: 16px; transition: border 0.1s, background 0.1s, box-shadow 0.1s;
   }
-
-  /* 弹出的表情精致卡片样式：继承卡片糖果色 + 玻璃质感 */
-  .tile.emoji-pop-out .emoji-sprite,
-  .tile.emoji-pop-out-first .emoji-sprite {
-    border-radius: 18px;
-    /* border / background / box-shadow 由 JS 动态设置，匹配卡片颜色 */
-    transition: border 0.1s, background 0.1s, box-shadow 0.1s;
+  .tile.emoji-pop-out .emoji-sprite::before, .tile.emoji-pop-out-first .emoji-sprite::before {
+    content: ''; position: absolute; top: 3px; left: 12%; width: 76%; height: 22%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+    border-radius: 12px 12px 50% 50%; pointer-events: none; z-index: 70;
   }
-
-  /* 弹出表情的光泽高光层 */
-  .tile.emoji-pop-out .emoji-sprite::before,
-  .tile.emoji-pop-out-first .emoji-sprite::before {
-    content: '';
-    position: absolute;
-    top: 3px; left: 12%;
-    width: 76%; height: 22%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
-    border-radius: 12px 12px 50% 50%;
-    pointer-events: none;
-    z-index: 70;
-  }
-
-  .tile.emoji-pop-out .emoji-sprite {
-    animation: emojiPopOut 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    z-index: 60 !important;
-  }
-  .tile.emoji-pop-out-first .emoji-sprite {
-    animation: emojiPopOutFirst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-    z-index: 55 !important;
-  }
-
+  .tile.emoji-pop-out .emoji-sprite { animation: emojiPopOut 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; z-index: 60 !important; }
+  .tile.emoji-pop-out-first .emoji-sprite { animation: emojiPopOutFirst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; z-index: 55 !important; }
   @keyframes emojiPopOut {
-    0%   { transform: scale(1) translateY(0) rotate(0deg); filter: brightness(1) saturate(1) contrast(1); }
-    25%  { transform: scale(1.35) translateY(-18%) rotate(-5deg); filter: brightness(1.06) saturate(1.15) contrast(1.02); }
-    45%  { transform: scale(1.55) translateY(-30%) rotate(4deg); filter: brightness(1.10) saturate(1.2) contrast(1.04); }
-    65%  { transform: scale(1.45) translateY(-25%) rotate(-2deg); filter: brightness(1.06) saturate(1.15) contrast(1.02); }
-    80%  { transform: scale(1.50) translateY(-28%) rotate(1deg); filter: brightness(1.08) saturate(1.18) contrast(1.03); }
-    100% { transform: scale(1.45) translateY(-25%) rotate(0deg); filter: brightness(1.06) saturate(1.15) contrast(1.02); }
+    0%   { transform: scale(1) translateY(0) rotate(0deg); filter: brightness(1); }
+    25%  { transform: scale(1.35) translateY(-18%) rotate(-5deg); filter: brightness(1.1); }
+    45%  { transform: scale(1.55) translateY(-30%) rotate(4deg); filter: brightness(1.2); }
+    65%  { transform: scale(1.45) translateY(-25%) rotate(-2deg); filter: brightness(1.1); }
+    80%  { transform: scale(1.50) translateY(-28%) rotate(1deg); filter: brightness(1.15); }
+    100% { transform: scale(1.45) translateY(-25%) rotate(0deg); filter: brightness(1.1); }
   }
-
   @keyframes emojiPopOutFirst {
-    0%   { transform: scale(1) translateY(0) rotate(0deg); filter: brightness(1) saturate(1) contrast(1); }
-    30%  { transform: scale(1.30) translateY(-15%) rotate(5deg); filter: brightness(1.06) saturate(1.15) contrast(1.02); }
-    55%  { transform: scale(1.40) translateY(-22%) rotate(-3deg); filter: brightness(1.10) saturate(1.2) contrast(1.04); }
-    75%  { transform: scale(1.35) translateY(-20%) rotate(1deg); filter: brightness(1.06) saturate(1.15) contrast(1.02); }
-    100% { transform: scale(1.35) translateY(-18%) rotate(0deg); filter: brightness(1.06) saturate(1.15) contrast(1.02); }
+    0%   { transform: scale(1) translateY(0) rotate(0deg); }
+    30%  { transform: scale(1.30) translateY(-15%) rotate(5deg); }
+    55%  { transform: scale(1.40) translateY(-22%) rotate(-3deg); }
+    75%  { transform: scale(1.35) translateY(-20%) rotate(1deg); }
+    100% { transform: scale(1.35) translateY(-18%) rotate(0deg); }
   }
-
-  /* 匹配成功时两个表情一起欢快弹跳然后消失 */
   .tile.emoji-match-celebrate .emoji-sprite {
-    border-radius: 18px;
-    /* border / background / box-shadow 由 JS 动态设置 */
+    border-radius: 16px;
     animation: emojiMatchCelebrate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     z-index: 60 !important;
   }
-
-  /* 欢庆时的光泽高光层 */
   .tile.emoji-match-celebrate .emoji-sprite::before {
-    content: '';
-    position: absolute;
-    top: 3px; left: 12%;
-    width: 76%; height: 22%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
-    border-radius: 12px 12px 50% 50%;
-    pointer-events: none;
-    z-index: 70;
+    content: ''; position: absolute; top: 3px; left: 12%; width: 76%; height: 22%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+    border-radius: 12px 12px 50% 50%; pointer-events: none; z-index: 70;
   }
-
   @keyframes emojiMatchCelebrate {
-    0%   { transform: scale(1.45) translateY(-25%) rotate(0deg); opacity: 1; filter: brightness(1.12) saturate(1.2) contrast(1.04); }
-    30%  { transform: scale(1.65) translateY(-40%) rotate(-8deg); opacity: 1; filter: brightness(1.18) saturate(1.3) contrast(1.06); }
-    60%  { transform: scale(1.55) translateY(-35%) rotate(6deg); opacity: 0.8; filter: brightness(1.12) saturate(1.2); }
-    100% { transform: scale(0.3) translateY(-60%) rotate(15deg); opacity: 0; filter: brightness(1.25) saturate(1.4); }
+    0%   { transform: scale(1.45) translateY(-25%) rotate(0deg); opacity: 1; filter: brightness(1.2); }
+    30%  { transform: scale(1.65) translateY(-40%) rotate(-8deg); opacity: 1; filter: brightness(1.4); }
+    60%  { transform: scale(1.55) translateY(-35%) rotate(6deg); opacity: 0.8; }
+    100% { transform: scale(0.3) translateY(-60%) rotate(15deg); opacity: 0; filter: brightness(1.5); }
   }
-
   .tile .emoji-sprite {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background-image: url('1774611396101205.png');
-    background-repeat: no-repeat;
-    image-rendering: auto;
-    z-index: 4;
-    border-radius: 0;
-    /* background-size 和 background-position 由 JS 精确计算像素值 */
+    background-repeat: no-repeat; image-rendering: auto; z-index: 4; border-radius: 0;
   }
-
-  /* 标签区：占卡片下方 16%，轻薄辅助色条 */
   .tile-label {
-    flex: 0 0 16%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.14);
-    padding: 0 3px;
-    overflow: hidden;
+    flex: 0 0 16%; display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.4); padding: 0 3px; overflow: hidden;
   }
-
   .tile-label span {
-    font-family: 'Nunito', sans-serif;
-    font-size: 0.52rem;
-    font-weight: 600;
-    color: rgba(255,255,255,0.88);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.28);
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1;
-    text-transform: uppercase;
+    font-family: 'Nunito', sans-serif; font-size: 0.52rem; font-weight: 600;
+    color: rgba(255,255,255,0.75); text-shadow: 0 0 6px rgba(0,212,255,0.3);
+    letter-spacing: 0.4px; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; line-height: 1; text-transform: uppercase;
   }
-
-
-
-  /* ===== Floating Score ===== */
+  /* Float Score - Neon */
   .float-score {
-    position: absolute;
-    color: #e91e63;
-    font-family: 'Fredoka One', cursive;
-    font-size: 1.3rem;
-    pointer-events: none;
-    z-index: 100;
+    position: absolute; color: var(--neon-yellow);
+    font-family: 'Fredoka One', cursive; font-size: 1.3rem;
+    pointer-events: none; z-index: 100;
     animation: scoreFloat 1s cubic-bezier(0, 0.5, 0.5, 1) forwards;
-    text-shadow: 0 2px 0 rgba(255,255,255,0.8), 0 0 10px rgba(255,105,180,0.4);
+    text-shadow: 0 0 10px rgba(255,230,109,0.6), 0 0 20px rgba(255,230,109,0.3);
   }
-
   @keyframes scoreFloat {
     0% { transform: translateY(0) scale(0.5); opacity: 0; }
     20% { transform: translateY(-10px) scale(1.3); opacity: 1; }
     40% { transform: translateY(-25px) scale(1); opacity: 1; }
     100% { transform: translateY(-65px) scale(0.8); opacity: 0; }
   }
-
-  /* ===== Combo Text ===== */
+  /* Combo Text - Neon */
   .combo-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
+    position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    color: #fff;
-    font-family: 'Fredoka One', cursive;
-    font-size: 2.6rem;
-    pointer-events: none;
-    z-index: 200;
-    text-shadow:
-      0 3px 0 #f06292,
-      0 0 20px rgba(255,105,180,0.6);
-    -webkit-text-stroke: 1px #f06292;
+    color: #fff; font-family: 'Fredoka One', cursive; font-size: 2.6rem;
+    pointer-events: none; z-index: 200;
+    text-shadow: 0 0 20px var(--neon-pink), 0 0 40px var(--neon-purple);
     animation: comboBlast 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     white-space: nowrap;
   }
-
   @keyframes comboBlast {
     0% { transform: translate(-50%, -50%) scale(0) rotate(-8deg); opacity: 0; }
     20% { transform: translate(-50%, -50%) scale(1.3) rotate(4deg); opacity: 1; }
@@ -584,404 +342,236 @@
     80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
     100% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 0; }
   }
-
-  /* ===== Hint ===== */
+  /* Hint - Neon pulse */
   @keyframes hintPulse {
     0%, 100% { filter: brightness(1); transform: scale(1); }
-    50% { filter: brightness(1.10) saturate(1.15); transform: scale(1.04); box-shadow: 0 0 16px rgba(255,193,7,0.45) !important; }
+    50% { filter: brightness(1.3); transform: scale(1.04); box-shadow: 0 0 20px rgba(255,230,109,0.6) !important; }
   }
-
-  .tile.hint {
-    animation: hintPulse 0.8s ease infinite;
-    z-index: 15;
-  }
-
-  /* ===== Buttons - Candy Park style ===== */
-  .btn-bar {
-    margin-top: 12px;
-    display: flex;
-    gap: 10px;
-    z-index: 1;
-  }
-
+  .tile.hint { animation: hintPulse 0.8s ease infinite; z-index: 15; }
+  /* Buttons - Neon Glass */
+  .btn-bar { margin-top: 12px; display: flex; gap: 10px; z-index: 1; }
   .btn-bar button {
-    font-family: 'Nunito', sans-serif;
-    padding: 10px 26px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-radius: 24px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    color: #fff;
-    font-weight: 800;
+    font-family: 'Nunito', sans-serif; padding: 10px 26px;
+    border: 1.5px solid rgba(255,255,255,0.15); border-radius: 24px;
+    font-size: 0.9rem; cursor: pointer; color: #fff; font-weight: 800;
     letter-spacing: 1px;
     transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    position: relative;
-    overflow: hidden;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    position: relative; overflow: hidden;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
-
-  /* Glossy top shine on buttons */
   .btn-bar button::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 45%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
-    border-radius: 20px 20px 50% 50%;
-    pointer-events: none;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 100%);
+    border-radius: 20px 20px 50% 50%; pointer-events: none;
   }
-
-  .btn-bar button:hover {
-    transform: translateY(-2px) scale(1.04);
-  }
-
-  .btn-bar button:active {
-    transform: translateY(1px) scale(0.97);
-  }
-
+  .btn-bar button:hover { transform: translateY(-2px) scale(1.04); }
+  .btn-bar button:active { transform: translateY(1px) scale(0.97); }
   #btn-restart {
-    background: linear-gradient(180deg, #ff9a9e 0%, #f06292 100%);
-    border-color: #ec407a;
-    box-shadow: 0 3px 14px rgba(240,98,146,0.35);
+    background: linear-gradient(180deg, rgba(255,45,149,0.6) 0%, rgba(255,45,149,0.3) 100%);
+    border-color: rgba(255,45,149,0.4);
+    box-shadow: 0 0 15px rgba(255,45,149,0.2);
   }
-
   #btn-hint {
-    background: linear-gradient(180deg, #a8e6cf 0%, #66bb6a 100%);
-    border-color: #4caf50;
-    box-shadow: 0 3px 14px rgba(102,187,106,0.3);
+    background: linear-gradient(180deg, rgba(57,255,20,0.5) 0%, rgba(57,255,20,0.2) 100%);
+    border-color: rgba(57,255,20,0.3);
+    box-shadow: 0 0 15px rgba(57,255,20,0.15);
   }
-
   #btn-shuffle {
-    background: linear-gradient(180deg, #a0c4ff 0%, #7c9ff5 100%);
-    border-color: #5c85e6;
-    box-shadow: 0 3px 14px rgba(124,159,245,0.35);
+    background: linear-gradient(180deg, rgba(0,212,255,0.5) 0%, rgba(0,212,255,0.2) 100%);
+    border-color: rgba(0,212,255,0.3);
+    box-shadow: 0 0 15px rgba(0,212,255,0.15);
   }
-
-  /* ===== Canvas layers ===== */
-  #link-canvas {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    pointer-events: none;
-    z-index: 100;
+  /* Power-up buttons */
+  #btn-freeze {
+    background: linear-gradient(180deg, rgba(0,229,255,0.5) 0%, rgba(0,229,255,0.2) 100%);
+    border-color: rgba(0,229,255,0.3);
+    box-shadow: 0 0 15px rgba(0,229,255,0.15);
   }
-
-  #particle-canvas {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    pointer-events: none;
-    z-index: 99;
+  #btn-bomb {
+    background: linear-gradient(180deg, rgba(255,107,53,0.5) 0%, rgba(255,107,53,0.2) 100%);
+    border-color: rgba(255,107,53,0.3);
+    box-shadow: 0 0 15px rgba(255,107,53,0.15);
   }
-
-  /* ===== Overlay - Candy Park popup ===== */
+  .btn-bar button:disabled {
+    opacity: 0.35; cursor: not-allowed; transform: none !important;
+  }
+  .btn-bar button .btn-count {
+    display: inline-block; background: rgba(255,255,255,0.2);
+    border-radius: 10px; padding: 0 6px; margin-left: 4px; font-size: 0.75rem;
+  }
+  /* Canvas layers */
+  #link-canvas { position: absolute; top: 8px; left: 8px; pointer-events: none; z-index: 100; }
+  #particle-canvas { position: absolute; top: 8px; left: 8px; pointer-events: none; z-index: 99; }
+  /* Overlay - Neon Popup */
   .overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.35);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 500;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6); display: flex; flex-direction: column;
+    align-items: center; justify-content: center; z-index: 500;
+    opacity: 0; pointer-events: none; transition: opacity 0.4s;
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   }
-
-  .overlay.show {
-    opacity: 1;
-    pointer-events: all;
-  }
-
+  .overlay.show { opacity: 1; pointer-events: all; }
   .overlay-box {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 2px solid rgba(255,255,255,0.6);
-    border-radius: 32px;
-    padding: 36px 56px;
-    text-align: center;
-    box-shadow: 0 15px 50px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5);
-    position: relative;
+    background: var(--dark-panel);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(180,77,255,0.3);
+    border-radius: 28px; padding: 36px 56px; text-align: center;
+    box-shadow: 0 0 40px rgba(180,77,255,0.15), 0 0 80px rgba(255,45,149,0.08);
   }
-
   .overlay h2 {
-    font-family: 'Fredoka One', cursive;
-    font-size: 2.2rem;
-    margin-bottom: 12px;
-    background: linear-gradient(180deg, #ff69b4 0%, #e91e63 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    filter: drop-shadow(0 2px 4px rgba(233,30,99,0.2));
+    font-family: 'Fredoka One', cursive; font-size: 2.2rem; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--neon-pink) 0%, var(--neon-purple) 50%, var(--neon-blue) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    filter: drop-shadow(0 0 10px rgba(255,45,149,0.3));
   }
-
   .overlay p {
-    font-family: 'Nunito', sans-serif;
-    color: var(--text-dark);
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 22px;
+    font-family: 'Nunito', sans-serif; color: var(--text-light);
+    font-size: 1.1rem; font-weight: 700; margin-bottom: 22px;
   }
-
   .overlay button {
-    font-family: 'Nunito', sans-serif;
-    padding: 12px 44px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-radius: 24px;
-    font-size: 1rem;
-    cursor: pointer;
-    color: #fff;
-    font-weight: 800;
-    background: linear-gradient(180deg, #ff9a9e 0%, #f06292 100%);
-    box-shadow: 0 4px 16px rgba(240,98,146,0.35);
-    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    transition: transform 0.15s;
-    position: relative;
-    overflow: hidden;
-    letter-spacing: 1px;
+    font-family: 'Nunito', sans-serif; padding: 12px 44px;
+    border: 1.5px solid rgba(255,45,149,0.4); border-radius: 24px;
+    font-size: 1rem; cursor: pointer; color: #fff; font-weight: 800;
+    background: linear-gradient(180deg, rgba(255,45,149,0.6) 0%, rgba(180,77,255,0.4) 100%);
+    box-shadow: 0 0 20px rgba(255,45,149,0.25);
+    text-shadow: 0 0 8px rgba(255,255,255,0.3);
+    transition: transform 0.15s; position: relative; overflow: hidden; letter-spacing: 1px;
   }
-
   .overlay button::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 45%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
-    pointer-events: none;
-    border-radius: 20px 20px 50% 50%;
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%);
+    pointer-events: none; border-radius: 20px 20px 50% 50%;
   }
-
-  .overlay button:hover {
-    transform: scale(1.05);
-  }
-
-  /* ===== Tile micro-shake (mismatch, non-blocking) ===== */
+  .overlay button:hover { transform: scale(1.05); }
+  /* Star rating in overlay */
+  .star-rating { margin: 10px 0 16px; font-size: 2rem; letter-spacing: 8px; }
+  .star-rating .star-on { color: var(--neon-yellow); text-shadow: 0 0 12px rgba(255,230,109,0.6); animation: starPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+  .star-rating .star-off { color: rgba(255,255,255,0.15); }
+  @keyframes starPop { 0% { transform: scale(0); } 60% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  /* Tile animations */
   @keyframes tileWiggle {
-    0%   { transform: translateX(0)   scale(1); }
+    0%   { transform: translateX(0) scale(1); }
     18%  { transform: translateX(-5px) scale(1.05); }
-    40%  { transform: translateX(4px)  scale(1.02); }
+    40%  { transform: translateX(4px) scale(1.02); }
     62%  { transform: translateX(-3px) scale(1.01); }
     80%  { transform: translateX(2px); }
-    100% { transform: translateX(0)   scale(1); }
+    100% { transform: translateX(0) scale(1); }
   }
-
   @keyframes tileRedFlash {
-    0%   { box-shadow: 0 0 0 0px   rgba(239,83,80,0),    inset 0 0 0 0 rgba(239,83,80,0); }
-    25%  { box-shadow: 0 0 0 3.5px rgba(239,83,80,0.9),  inset 0 0 8px rgba(239,83,80,0.25); }
-    60%  { box-shadow: 0 0 0 2px   rgba(239,83,80,0.5),  inset 0 0 4px rgba(239,83,80,0.1); }
-    100% { box-shadow: 0 0 0 0px   rgba(239,83,80,0),    inset 0 0 0 0 rgba(239,83,80,0); }
+    0%   { box-shadow: 0 0 0 0px rgba(255,23,68,0), inset 0 0 0 0 rgba(255,23,68,0); }
+    25%  { box-shadow: 0 0 0 3px rgba(255,23,68,0.8), inset 0 0 8px rgba(255,23,68,0.2); }
+    60%  { box-shadow: 0 0 0 2px rgba(255,23,68,0.4), inset 0 0 4px rgba(255,23,68,0.1); }
+    100% { box-shadow: 0 0 0 0px rgba(255,23,68,0), inset 0 0 0 0 rgba(255,23,68,0); }
   }
-
-  .tile-wiggle {
-    animation: tileWiggle 0.30s cubic-bezier(0.36,0.07,0.19,0.97) both,
-               tileRedFlash 0.40s ease both;
-  }
-
-  /* ===== Match Toast Feedback (居中弹出可爱表情+单词) ===== */
+  .tile-wiggle { animation: tileWiggle 0.30s cubic-bezier(0.36,0.07,0.19,0.97) both, tileRedFlash 0.40s ease both; }
+  /* Match Toast - Neon Glass */
   .match-toast-container {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 200;
-    pointer-events: none;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; justify-content: center; align-items: center;
+    z-index: 200; pointer-events: none;
   }
-
   .match-toast {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 2px solid rgba(255,255,255,0.6);
-    border-radius: 28px;
-    padding: 18px 32px 14px;
-    box-shadow: 0 8px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5);
-    opacity: 0;
-    transform: scale(0.3);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    background: var(--dark-panel);
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(180,77,255,0.3);
+    border-radius: 24px; padding: 18px 32px 14px;
+    box-shadow: 0 0 30px rgba(180,77,255,0.15);
+    opacity: 0; transform: scale(0.3);
     transition: opacity 0.15s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
-    pointer-events: none;
-    white-space: nowrap;
+    pointer-events: none; white-space: nowrap;
   }
-
-  .match-toast.show {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .match-toast.fade-out {
-    opacity: 0;
-    transform: scale(0.6) translateY(-20px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
-
+  .match-toast.show { opacity: 1; transform: scale(1); }
+  .match-toast.fade-out { opacity: 0; transform: scale(0.6) translateY(-20px); transition: opacity 0.25s ease, transform 0.25s ease; }
   .match-toast .toast-emoji {
-    width: 64px; height: 64px;
-    border-radius: 16px;
-    border: 2px solid rgba(255,255,255,0.6);
-    overflow: hidden;
-    flex-shrink: 0;
+    width: 64px; height: 64px; border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.2); overflow: hidden; flex-shrink: 0;
     animation: toastBounce 0.5s cubic-bezier(0.34,1.56,0.64,1);
-    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 0 15px rgba(180,77,255,0.2);
   }
-
-  @keyframes toastBounce {
-    0% { transform: scale(0.2) rotate(-15deg); }
-    50% { transform: scale(1.15) rotate(5deg); }
-    70% { transform: scale(0.95) rotate(-2deg); }
-    100% { transform: scale(1) rotate(0deg); }
-  }
-
+  @keyframes toastBounce { 0% { transform: scale(0.2) rotate(-15deg); } 50% { transform: scale(1.15) rotate(5deg); } 70% { transform: scale(0.95) rotate(-2deg); } 100% { transform: scale(1) rotate(0deg); } }
   .match-toast .toast-emoji .emoji-sprite {
     width: 100%; height: 100%;
     background-image: url('1774611396101205.png');
-    background-size: 300% 300%;
-    image-rendering: auto;
+    background-size: 300% 300%; image-rendering: auto;
   }
-
   .match-toast .toast-word {
-    font-size: 1.5rem;
-    font-weight: 900;
-    color: #e91e63;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
-    letter-spacing: 1px;
-    animation: wordPop 0.4s 0.1s cubic-bezier(0.34,1.56,0.64,1) both;
+    font-size: 1.5rem; font-weight: 900; color: var(--neon-pink);
+    text-shadow: 0 0 10px rgba(255,45,149,0.4);
+    letter-spacing: 1px; animation: wordPop 0.4s 0.1s cubic-bezier(0.34,1.56,0.64,1) both;
   }
-
-  @keyframes wordPop {
-    0% { opacity: 0; transform: translateY(10px) scale(0.8); }
-    100% { opacity: 1; transform: translateY(0) scale(1); }
-  }
-
+  @keyframes wordPop { 0% { opacity: 0; transform: translateY(10px) scale(0.8); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
   .match-toast .toast-meaning {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #a1887f;
+    font-size: 0.9rem; font-weight: 600; color: var(--text-dim);
     animation: wordPop 0.4s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
   }
-
-  /* ===== 响应式布局 - 手机适配 ===== */
-  @media (max-width: 768px) {
-    /* 标题适配 */
-    .title-banner h1 {
-      font-size: 2.4rem !important;
-      -webkit-text-stroke: 2px rgba(255,255,255,0.95) !important;
-    }
-    
-    .subtitle {
-      font-size: 0.9rem !important;
-    }
-    
-    /* 分数面板适配 */
-    .score-panel {
-      flex-wrap: wrap;
-      gap: 4px;
-      padding: 4px 8px;
-    }
-    
-    .score-item {
-      padding: 2px 8px;
-      font-size: 0.75rem;
-      border-right: none;
-    }
-    
-    .score-item .value {
-      font-size: 0.85rem;
-    }
-    
-    /* 按钮适配 */
-    .btn-bar {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 6px;
-    }
-    
-    .btn-bar button {
-      padding: 8px 20px;
-      font-size: 0.8rem;
-    }
+  /* Screen shake for big combos */
+  @keyframes screenShake {
+    0%, 100% { transform: translate(0, 0); }
+    10% { transform: translate(-3px, 2px); }
+    20% { transform: translate(3px, -2px); }
+    30% { transform: translate(-2px, -1px); }
+    40% { transform: translate(2px, 1px); }
+    50% { transform: translate(-1px, 2px); }
+    60% { transform: translate(1px, -1px); }
+    70% { transform: translate(-2px, 1px); }
+    80% { transform: translate(2px, -2px); }
+    90% { transform: translate(-1px, 1px); }
   }
-  
+  .screen-shake { animation: screenShake 0.3s ease; }
+  /* Freeze effect */
+  .freeze-active .timer-bar {
+    background: linear-gradient(90deg, #00e5ff 0%, #00b8d4 50%, #0097a7 100%) !important;
+    box-shadow: 0 0 15px rgba(0,229,255,0.5) !important;
+  }
+  .freeze-active .timer-bar-container {
+    box-shadow: 0 0 20px rgba(0,229,255,0.3) !important;
+    border-color: rgba(0,229,255,0.4) !important;
+  }
+  /* Neon floating particles background */
+  #bg-particles {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+  }
+  /* Responsive */
+  @media (max-width: 768px) {
+    .title-banner h1 { font-size: 2.4rem !important; }
+    .subtitle { font-size: 0.8rem !important; }
+    .score-panel { flex-wrap: wrap; gap: 4px; padding: 4px 8px; }
+    .score-item { padding: 2px 8px; font-size: 0.75rem; border-right: none; }
+    .score-item .value { font-size: 0.85rem; }
+    .btn-bar { flex-wrap: wrap; justify-content: center; gap: 6px; }
+    .btn-bar button { padding: 8px 16px; font-size: 0.78rem; }
+  }
   @media (max-width: 480px) {
-    /* 超小屏幕适配 */
-    .title-banner h1 {
-      font-size: 2rem !important;
-    }
-    
-    .subtitle {
-      font-size: 0.8rem !important;
-    }
-    
-    .score-panel {
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-    }
-    
-    .score-item {
-      width: 100%;
-      justify-content: center;
-      border-bottom: 1px solid rgba(0,0,0,0.05);
-    }
-    
-    .score-item:last-child {
-      border-bottom: none;
-    }
-    
-    .btn-bar {
-      flex-direction: column;
-      align-items: center;
-    }
-    
-    .btn-bar button {
-      width: 100%;
-      max-width: 200px;
-    }
+    .title-banner h1 { font-size: 2rem !important; }
+    .subtitle { font-size: 0.7rem !important; }
+    .score-panel { flex-direction: column; align-items: center; gap: 2px; }
+    .score-item { width: 100%; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .score-item:last-child { border-bottom: none; }
+    .btn-bar { flex-direction: column; align-items: center; }
+    .btn-bar button { width: 100%; max-width: 200px; }
   }
 </style>
 </head>
 <body>
-
-<!-- Candy Park floating decorations -->
-<div class="deco float1" style="top:5%;left:4%;font-size:2.2rem;">🍭</div>
-<div class="deco float2" style="top:12%;left:88%;font-size:1.8rem;">🍬</div>
-<div class="deco float3" style="top:70%;left:6%;font-size:2rem;">🧁</div>
-<div class="deco float1" style="top:78%;left:92%;font-size:1.6rem;animation-delay:1s;">🍩</div>
-<div class="deco float2" style="top:3%;left:42%;font-size:1.5rem;animation-delay:0.5s;">☁️</div>
-<div class="deco float3" style="top:88%;left:48%;font-size:1.4rem;animation-delay:1.5s;">🌈</div>
-<div class="deco float1" style="top:35%;left:2%;font-size:1.6rem;animation-delay:2s;">🍪</div>
-<div class="deco float2" style="top:42%;left:96%;font-size:1.8rem;animation-delay:0.8s;">🎀</div>
-<div class="deco float3" style="top:55%;left:5%;font-size:1.3rem;animation-delay:1.2s;">⭐</div>
-<div class="deco float1" style="top:20%;left:94%;font-size:1.4rem;animation-delay:0.3s;">🍰</div>
-
+<canvas id="bg-particles"></canvas>
 <div class="title-banner">
   <span class="logo-deco left">🍭</span>
   <h1>Candy<br>Park</h1>
   <span class="logo-deco right">🍭</span>
 </div>
-<p class="subtitle">Tap, Listen & Match</p>
-
+<p class="subtitle">✨ Neon Edition ✨</p>
 <div class="timer-bar-container">
   <div class="timer-bar" id="timer-bar"></div>
 </div>
-
 <div class="score-panel">
-  <div class="score-item"><span class="label">📋 关卡</span><span class="value" id="level">1 / 3</span></div>
+  <div class="score-item"><span class="label">📋 关卡</span><span class="value" id="level">1 / 5</span></div>
   <div class="score-item"><span class="label">🏆 分数</span><span class="value" id="score">0</span></div>
   <div class="score-item"><span class="label">🎯 剩余</span><span class="value" id="remaining">0</span></div>
   <div class="score-item"><span class="label">⏱ 时间</span><span class="value" id="timer">120</span>s</div>
   <div class="score-item"><span class="label">🔥 连击</span><span class="value" id="combo">0</span></div>
 </div>
-
 <div class="match-toast-container" id="match-toast-container"></div>
 <div class="board-frame">
   <div id="game-board">
@@ -989,22 +579,23 @@
     <canvas id="particle-canvas"></canvas>
   </div>
 </div>
-
 <div class="btn-bar">
   <button id="btn-restart">🔄 重新开始</button>
   <button id="btn-hint">💡 提示</button>
   <button id="btn-shuffle">🔀 洗牌</button>
+  <button id="btn-freeze">❄️ 冻结<span class="btn-count" id="freeze-count">2</span></button>
+  <button id="btn-bomb">💣 炸弹<span class="btn-count" id="bomb-count">1</span></button>
 </div>
-
 <div class="overlay" id="overlay">
   <div class="overlay-box">
     <h2 id="overlay-title">🎉 恭喜通关！</h2>
+    <div class="star-rating" id="star-rating"></div>
     <p id="overlay-text">最终得分：<span id="final-score">0</span></p>
     <button id="overlay-btn">🍭 再来一局</button>
   </div>
 </div>
-
 <script>
+
 // ============ Game Config ============
 let INNER_ROWS = 4;
 let INNER_COLS = 4;
@@ -1046,18 +637,26 @@ function calculateBoardSize() {
 
 // ============ Level System ============
 const LEVELS = [
-  // 教学关：牌少、时间宽松、语音慢、提示冷却短
-  { name: 'Level 1', emoji: '🌱', types: [0, 1, 2],               time: 120, label: '初识情绪', rows: 4, cols: 4,
+  // 第1关：教学 - 牌少、时间宽松
+  { name: 'Level 1', emoji: '💜', types: [0, 1, 2],               time: 120, label: '霓虹初现', rows: 4, cols: 4,
     speechRate: 0.78, hintCooldown: 4000,  autoShuffleDelay: 8000,
-    desc: '认识 3 种情绪 · 慢慢来 😊' },
-  // 正常关：数量提升、节奏正常
-  { name: 'Level 2', emoji: '🌸', types: [0, 1, 2, 3, 4, 5],     time: 110, label: '情绪进阶', rows: 6, cols: 6,
+    desc: '认识 3 种情绪 · 慢慢来 💜', freezeCharges: 3, bombCharges: 1 },
+  // 第2关：入门 - 4种情绪
+  { name: 'Level 2', emoji: '💙', types: [0, 1, 2, 3],            time: 110, label: '光影交错', rows: 4, cols: 6,
+    speechRate: 0.82, hintCooldown: 5000,  autoShuffleDelay: 10000,
+    desc: '4 种情绪 · 节奏渐起 💙', freezeCharges: 2, bombCharges: 1 },
+  // 第3关：进阶 - 6种情绪
+  { name: 'Level 3', emoji: '💗', types: [0, 1, 2, 3, 4, 5],     time: 100, label: '霓虹进阶', rows: 6, cols: 6,
     speechRate: 0.88, hintCooldown: 7000,  autoShuffleDelay: 12000,
-    desc: '6 种情绪 · 节奏加快 🌸' },
-  // 挑战关：时间紧、语音快、提示冷却长、自动洗牌更慢
-  { name: 'Level 3', emoji: '🌟', types: [0, 1, 2, 3, 4, 5, 6, 7, 8], time: 90, label: '情绪大师', rows: 6, cols: 8,
-    speechRate: 1.05, hintCooldown: 12000, autoShuffleDelay: 18000,
-    desc: '全 9 种 · 限时挑战 ⚡' },
+    desc: '6 种情绪 · 节奏加快 💗', freezeCharges: 2, bombCharges: 1 },
+  // 第4关：挑战 - 8种情绪
+  { name: 'Level 4', emoji: '🧡', types: [0, 1, 2, 3, 4, 5, 6, 7], time: 90, label: '极光风暴', rows: 6, cols: 8,
+    speechRate: 0.95, hintCooldown: 10000, autoShuffleDelay: 15000,
+    desc: '8 种情绪 · 限时挑战 🧡', freezeCharges: 1, bombCharges: 1 },
+  // 第5关：大师 - 全9种
+  { name: 'Level 5', emoji: '⚡', types: [0, 1, 2, 3, 4, 5, 6, 7, 8], time: 75, label: '霓虹大师', rows: 8, cols: 8,
+    speechRate: 1.05, hintCooldown: 14000, autoShuffleDelay: 20000,
+    desc: '全 9 种 · 终极考验 ⚡', freezeCharges: 1, bombCharges: 0 },
 ];
 let currentLevel = 0;
 
@@ -1079,35 +678,32 @@ const EMOJI_WORDS = EMOJI_DATA.map(d => d.word);
 let audioUnlocked = false;
 let audioCtx = null;
 
-// ===== 选中特效音（Web Audio API 合成，无需外部文件）=====
+// ===== 选中特效音（霓虹电子音）=====
 function playSelectSfx() {
   try {
     if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const now = audioCtx.currentTime;
-    // 清脆的「叮」音：三个正弦波叠加，更饱满
     const osc1 = audioCtx.createOscillator();
     const osc2 = audioCtx.createOscillator();
     const osc3 = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(880, now);   // A5
-    osc1.frequency.exponentialRampToValueAtTime(1320, now + 0.05);
+    osc1.frequency.setValueAtTime(1047, now);   // C6
+    osc1.frequency.exponentialRampToValueAtTime(1568, now + 0.04);
     osc2.type = 'sine';
-    osc2.frequency.setValueAtTime(1760, now);  // A6 泛音
-    osc2.frequency.exponentialRampToValueAtTime(2200, now + 0.03);
+    osc2.frequency.setValueAtTime(2093, now);  // C7
+    osc2.frequency.exponentialRampToValueAtTime(2637, now + 0.03);
     osc3.type = 'triangle';
-    osc3.frequency.setValueAtTime(1100, now);  // 中间泛音，增加厚度
-    osc3.frequency.exponentialRampToValueAtTime(1650, now + 0.04);
-    gain.gain.setValueAtTime(0.22, now);
-    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
-    osc1.connect(gain);
-    osc2.connect(gain);
-    osc3.connect(gain);
+    osc3.frequency.setValueAtTime(1319, now);
+    osc3.frequency.exponentialRampToValueAtTime(1976, now + 0.035);
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    osc1.connect(gain); osc2.connect(gain); osc3.connect(gain);
     gain.connect(audioCtx.destination);
     osc1.start(now); osc2.start(now); osc3.start(now);
-    osc1.stop(now + 0.12); osc2.stop(now + 0.12); osc3.stop(now + 0.12);
-  } catch(e) { /* 静默失败 */ }
+    osc1.stop(now + 0.1); osc2.stop(now + 0.1); osc3.stop(now + 0.1);
+  } catch(e) {}
 }
 
 // 不匹配时的短促「嗡」音
@@ -1418,17 +1014,17 @@ const particleCanvas = document.getElementById('particle-canvas');
 const pCtx = particleCanvas.getContext('2d');
 let particleAnimId = null;
 
-// Soft pastel particle colors matching tile types
+// Neon particle colors matching tile types
 const TYPE_COLORS = [
-  ['#f8a4c0', '#f06292', '#fce4ec'],  // Strawberry Pink
-  ['#ffd699', '#ffb74d', '#fff3e0'],  // Tangerine
-  ['#b2dfb4', '#81c784', '#e8f5e9'],  // Mint
-  ['#a3d5ff', '#64b5f6', '#e3f2fd'],  // Blueberry
-  ['#d7a0e0', '#ba68c8', '#f3e5f5'],  // Grape
-  ['#f8bbd0', '#f48fb1', '#fce4ec'],  // Bubblegum
-  ['#99e5ed', '#4dd0e1', '#e0f7fa'],  // Cotton Candy
-  ['#ffe88a', '#ffd54f', '#fffde7'],  // Lemon
-  ['#ffb89a', '#ff8a65', '#fbe9e7'],  // Peach
+  ['#ff6eb4', '#ff2d95', '#ff9ecf'],  // Neon Pink
+  ['#ff9a5c', '#ff6b35', '#ffcba4'],  // Neon Orange
+  ['#7dff5c', '#39ff14', '#b8ffaa'],  // Neon Green
+  ['#5ce8ff', '#00d4ff', '#a8f0ff'],  // Neon Blue
+  ['#d08fff', '#b44dff', '#e4c4ff'],  // Neon Purple
+  ['#ff8ec8', '#ff69b4', '#ffb8dd'],  // Hot Pink
+  ['#5cf5ff', '#00e5ff', '#a8faff'],  // Cyan
+  ['#fff08a', '#ffe66d', '#fff5b8'],  // Neon Yellow
+  ['#ff9a6c', '#ff6e40', '#ffcbb0'],  // Coral
 ];
 
 // 给弹出的表情动态设置匹配卡片颜色的精致样式
@@ -1441,12 +1037,12 @@ function applyPopOutStyle(tileEl, type) {
   const light = colors[0];   // 浅色
   const main = colors[1];    // 主色
   const bg = colors[2];      // 背景色
-  sprite.style.border = `3.5px solid rgba(255,255,255,0.85)`;
-  sprite.style.backgroundColor = bg;
-  sprite.style.boxShadow = `0 6px 22px ${main}66, 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -2px 6px ${light}88, 0 0 16px ${light}44`;
+  sprite.style.border = `2.5px solid rgba(255,255,255,0.7)`;
+  sprite.style.backgroundColor = 'rgba(10,10,26,0.8)';
+  sprite.style.boxShadow = `0 0 20px ${main}88, 0 0 40px ${main}44, 0 2px 8px rgba(0,0,0,0.3), inset 0 0 12px ${light}33`;
 }
 
-// 给欢庆阶段的表情设置更强烈的发光效果
+// 给欢庆阶段的表情设置更强烈的霓虹发光效果
 function applyMatchCelebrateStyle(tileEl, type) {
   if (!tileEl) return;
   const colors = TYPE_COLORS[type] || ['#fff', '#ffd700', '#ffab91'];
@@ -1455,9 +1051,9 @@ function applyMatchCelebrateStyle(tileEl, type) {
   const light = colors[0];
   const main = colors[1];
   const bg = colors[2];
-  sprite.style.border = `3.5px solid rgba(255,255,255,0.9)`;
-  sprite.style.backgroundColor = bg;
-  sprite.style.boxShadow = `0 8px 30px ${main}77, 0 3px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -3px 8px ${light}88, 0 0 24px ${light}55`;
+  sprite.style.border = `2.5px solid rgba(255,255,255,0.8)`;
+  sprite.style.backgroundColor = 'rgba(10,10,26,0.85)';
+  sprite.style.boxShadow = `0 0 30px ${main}aa, 0 0 60px ${main}55, 0 3px 12px rgba(0,0,0,0.4), inset 0 0 16px ${light}44`;
 }
 
 // 清除弹出表情的动态样式
@@ -2416,14 +2012,17 @@ function showComboText(combo) {
   const existing = boardEl.querySelector('.combo-text');
   if (existing) existing.remove();
 
-  const labels = ['', '', 'Sweet! ×2', 'Yummy! ×3', 'Delicious! ×4', 'Sugar Rush! ×5'];
-  const text = labels[Math.min(combo, 5)] || `Amazing! ×${Math.min(combo, 5)}`;
+  const labels = ['', '', 'Neon! ×2', 'Electric! ×3', 'Plasma! ×4', 'SUPERNOVA! ×5'];
+  const text = labels[Math.min(combo, 5)] || `GODLIKE! ×${Math.min(combo, 5)}`;
 
   const el = document.createElement('div');
   el.className = 'combo-text';
   el.textContent = text;
   boardEl.appendChild(el);
   setTimeout(() => el.remove(), 1000);
+
+  // 3连击以上触发屏幕震动
+  if (combo >= 3) triggerScreenShake();
 }
 
 function gameWin() {
@@ -2436,35 +2035,52 @@ function gameWin() {
 
   const winBoardW = INNER_COLS * CELL + GAP;
   const winBoardH = INNER_ROWS * CELL + GAP;
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 12; i++) {
     setTimeout(() => {
       const x = Math.random() * winBoardW;
       const y = Math.random() * winBoardH;
-      spawnParticles(x, y, Math.floor(Math.random() * NUM_TYPES), 25);
-    }, i * 100);
+      spawnParticles(x, y, Math.floor(Math.random() * NUM_TYPES), 30);
+    }, i * 80);
   }
+
+  // 计算星级评价
+  const levelTime = LEVELS[currentLevel].time;
+  const timePercent = timeLeft / levelTime;
+  let stars = 1;
+  if (timePercent > 0.5) stars = 3;
+  else if (timePercent > 0.25) stars = 2;
 
   const isLastLevel = currentLevel >= LEVELS.length - 1;
   const overlayBtn = document.getElementById('overlay-btn');
+  const starRating = document.getElementById('star-rating');
+
+  // 生成星级HTML
+  let starHtml = '';
+  for (let i = 1; i <= 3; i++) {
+    if (i <= stars) {
+      starHtml += `<span class="star-on" style="animation-delay:${i*0.15}s">⭐</span>`;
+    } else {
+      starHtml += `<span class="star-off">☆</span>`;
+    }
+  }
+  starRating.innerHTML = starHtml;
 
   setTimeout(() => {
     if (isLastLevel) {
-      // All levels complete!
-      document.getElementById('overlay-title').textContent = '🎉🍬 全部通关！';
+      document.getElementById('overlay-title').textContent = '🎉✨ 全部通关！';
       document.getElementById('overlay-text').innerHTML =
-        `恭喜你完成了所有关卡！<br>最终得分：<b style="color:#e91e63;font-size:1.5rem">${score}</b><br><span style="font-size:0.9rem;opacity:0.7">（时间奖励 +${timeBonus}）</span>`;
-      overlayBtn.textContent = '🍭 再来一局';
+        `恭喜你征服了所有霓虹关卡！<br>最终得分：<b style="color:var(--neon-pink);font-size:1.5rem;text-shadow:0 0 10px rgba(255,45,149,0.5)">${score}</b><br><span style="font-size:0.9rem;opacity:0.5">（时间奖励 +${timeBonus}）</span>`;
+      overlayBtn.textContent = '⚡ 再来一局';
       overlayBtn.onclick = () => { currentLevel = 0; restartGame(); };
     } else {
-      // Level complete, go to next
       const nextLevel = LEVELS[currentLevel + 1];
       document.getElementById('overlay-title').textContent = `${LEVELS[currentLevel].emoji} 第${currentLevel + 1}关通过！`;
       document.getElementById('overlay-text').innerHTML =
-        `得分：<b style="color:#e91e63;font-size:1.3rem">${score}</b>` +
-        `<br><span style="font-size:0.9rem;opacity:0.7">（时间奖励 +${timeBonus}）</span>` +
-        `<br><br><span style="font-size:1rem;color:#ad1457">下一关：${nextLevel.emoji} ${nextLevel.label}</span>` +
-        `<br><span style="font-size:0.88rem;color:#6d4c41;font-weight:700">${nextLevel.desc}</span>`;
-      overlayBtn.textContent = '🍬 下一关';
+        `得分：<b style="color:var(--neon-pink);font-size:1.3rem;text-shadow:0 0 8px rgba(255,45,149,0.4)">${score}</b>` +
+        `<br><span style="font-size:0.9rem;opacity:0.5">（时间奖励 +${timeBonus}）</span>` +
+        `<br><br><span style="font-size:1rem;color:var(--neon-purple);text-shadow:0 0 8px rgba(180,77,255,0.3)">下一关：${nextLevel.emoji} ${nextLevel.label}</span>` +
+        `<br><span style="font-size:0.88rem;color:var(--text-dim);font-weight:700">${nextLevel.desc}</span>`;
+      overlayBtn.textContent = '⚡ 下一关';
       overlayBtn.onclick = nextLevel_go;
     }
     overlay.classList.add('show');
@@ -2474,21 +2090,21 @@ function gameWin() {
 function nextLevel_go() {
   currentLevel++;
   overlay.classList.remove('show');
-  // Clear toast feedback
   matchToastContainer.innerHTML = '';
   if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
   matchedWordsThisLevel = new Set();
-  // Keep score across levels!
   remaining = 0;
   selectedTile = null;
   isAnimating = false;
   comboCount = 0;
   lastMatchTime = 0;
   timerBar.classList.remove('danger');
+  document.body.classList.remove('freeze-active');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
   particles.length = 0;
 
+  initPowerUps();
   updateLevelDisplay();
   preloadLevelAudio(LEVELS[currentLevel].types);
   createBoard();
@@ -2501,7 +2117,6 @@ function nextLevel_go() {
 
 function gameOver() {
   stopTimer();
-  // Clear selection state
   if (selectedTile) {
     if (tileElements[selectedTile.row]?.[selectedTile.col]) {
       tileElements[selectedTile.row][selectedTile.col].classList.remove('selected');
@@ -2509,12 +2124,14 @@ function gameOver() {
     selectedTile = null;
   }
   isAnimating = false;
+  document.body.classList.remove('freeze-active');
 
   document.getElementById('overlay-title').textContent = '⏰ 时间到！';
+  document.getElementById('star-rating').innerHTML = '<span class="star-off">☆</span><span class="star-off">☆</span><span class="star-off">☆</span>';
   document.getElementById('overlay-text').innerHTML =
-    `第${currentLevel + 1}关 · 最终得分：<b style="color:#e91e63;font-size:1.5rem">${score}</b>`;
+    `第${currentLevel + 1}关 · 最终得分：<b style="color:var(--neon-pink);font-size:1.5rem;text-shadow:0 0 10px rgba(255,45,149,0.5)">${score}</b>`;
   const overlayBtn = document.getElementById('overlay-btn');
-  overlayBtn.textContent = '🍭 重新开始';
+  overlayBtn.textContent = '⚡ 重新开始';
   overlayBtn.onclick = restartGame;
   overlay.classList.add('show');
 }
@@ -2532,7 +2149,6 @@ function updateLevelDisplay() {
 
 function restartGame() {
   overlay.classList.remove('show');
-  // Clear toast feedback
   matchToastContainer.innerHTML = '';
   if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
   matchedWordsThisLevel = new Set();
@@ -2546,15 +2162,16 @@ function restartGame() {
   scoreEl.textContent = 0;
   comboEl.textContent = 0;
   timerBar.classList.remove('danger');
+  document.body.classList.remove('freeze-active');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
   particles.length = 0;
 
-  // Reset overlay button
   const overlayBtn = document.getElementById('overlay-btn');
-  overlayBtn.textContent = '🍭 再来一局';
+  overlayBtn.textContent = '⚡ 再来一局';
   overlayBtn.onclick = restartGame;
 
+  initPowerUps();
   updateLevelDisplay();
   preloadLevelAudio(LEVELS[currentLevel].types);
   createBoard();
@@ -2566,10 +2183,212 @@ function restartGame() {
   startTimer();
 }
 
+// ============ Power-Up System ============
+let freezeCharges = 2;
+let bombCharges = 1;
+let freezeActive = false;
+let freezeTimer = null;
+
+function initPowerUps() {
+  const lvl = LEVELS[currentLevel];
+  freezeCharges = lvl.freezeCharges ?? 2;
+  bombCharges = lvl.bombCharges ?? 1;
+  freezeActive = false;
+  if (freezeTimer) { clearTimeout(freezeTimer); freezeTimer = null; }
+  document.body.classList.remove('freeze-active');
+  updatePowerUpUI();
+}
+
+function updatePowerUpUI() {
+  const freezeBtn = document.getElementById('btn-freeze');
+  const bombBtn = document.getElementById('btn-bomb');
+  const freezeCount = document.getElementById('freeze-count');
+  const bombCount = document.getElementById('bomb-count');
+  if (freezeCount) freezeCount.textContent = freezeCharges;
+  if (bombCount) bombCount.textContent = bombCharges;
+  if (freezeBtn) freezeBtn.disabled = freezeCharges <= 0;
+  if (bombBtn) bombBtn.disabled = bombCharges <= 0;
+}
+
+function activateFreeze() {
+  if (freezeCharges <= 0 || freezeActive) return;
+  freezeCharges--;
+  freezeActive = true;
+  updatePowerUpUI();
+  document.body.classList.add('freeze-active');
+
+  // 暂停计时器5秒
+  stopTimer();
+  const freezeDuration = 5000;
+
+  // 冻结视觉效果
+  const boardFrame = document.querySelector('.board-frame');
+  if (boardFrame) boardFrame.style.filter = 'hue-rotate(180deg) brightness(1.1)';
+
+  freezeTimer = setTimeout(() => {
+    freezeActive = false;
+    document.body.classList.remove('freeze-active');
+    if (boardFrame) boardFrame.style.filter = '';
+    // 恢复计时器
+    startTimerFromCurrent();
+    freezeTimer = null;
+  }, freezeDuration);
+}
+
+function startTimerFromCurrent() {
+  stopTimer();
+  const levelTime = LEVELS[currentLevel] ? LEVELS[currentLevel].time : GAME_TIME;
+  timerBar.style.width = (timeLeft / levelTime * 100) + '%';
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = Math.max(0, timeLeft);
+    timerBar.style.width = (timeLeft / levelTime * 100) + '%';
+    if (timeLeft <= 15) timerBar.classList.add('danger');
+    if (timeLeft <= 0) { stopTimer(); gameOver(); }
+  }, 1000);
+}
+
+function activateBomb() {
+  if (bombCharges <= 0 || isAnimating) return;
+  bombCharges--;
+  updatePowerUpUI();
+
+  // 找到一对可匹配的牌并消除
+  const hint = findHint();
+  if (!hint) return;
+
+  isAnimating = true;
+  const [h1, h2] = hint;
+  const type = board[h1.r][h1.c];
+
+  // 炸弹爆炸视觉效果
+  const t1 = tileElements[h1.r]?.[h1.c];
+  const t2 = tileElements[h2.r]?.[h2.c];
+
+  // 屏幕震动
+  triggerScreenShake();
+
+  // 大量粒子爆炸
+  const p1 = boardToPixel(h1.r, h1.c);
+  const p2 = boardToPixel(h2.r, h2.c);
+  spawnParticles(p1.x, p1.y, type, 35);
+  spawnParticles(p2.x, p2.y, type, 35);
+
+  if (t1) t1.classList.add('matched');
+  if (t2) t2.classList.add('matched');
+
+  setTimeout(() => {
+    if (t1) { t1.remove(); tileElements[h1.r][h1.c] = null; }
+    if (t2) { t2.remove(); tileElements[h2.r][h2.c] = null; }
+    board[h1.r][h1.c] = -1;
+    board[h2.r][h2.c] = -1;
+    remaining -= 2;
+    remainingEl.textContent = remaining;
+    score += 50;
+    scoreEl.textContent = score;
+    isAnimating = false;
+
+    if (remaining <= 0) gameWin();
+    else if (!hasValidMoves()) showNoMovesOverlay();
+  }, 400);
+}
+
+// ============ Screen Shake ============
+function triggerScreenShake() {
+  document.body.classList.remove('screen-shake');
+  void document.body.offsetWidth;
+  document.body.classList.add('screen-shake');
+  setTimeout(() => document.body.classList.remove('screen-shake'), 300);
+}
+
+// ============ Neon Background Particles ============
+const bgCanvas = document.getElementById('bg-particles');
+const bgCtx = bgCanvas.getContext('2d');
+const bgParticles = [];
+
+function initBgParticles() {
+  bgCanvas.width = window.innerWidth;
+  bgCanvas.height = window.innerHeight;
+
+  bgParticles.length = 0;
+  const count = Math.min(50, Math.floor(window.innerWidth * window.innerHeight / 20000));
+  for (let i = 0; i < count; i++) {
+    bgParticles.push({
+      x: Math.random() * bgCanvas.width,
+      y: Math.random() * bgCanvas.height,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      size: 1 + Math.random() * 2,
+      color: ['#ff2d95', '#00d4ff', '#b44dff', '#39ff14', '#ffe66d'][Math.floor(Math.random() * 5)],
+      alpha: 0.1 + Math.random() * 0.3,
+      pulse: Math.random() * Math.PI * 2,
+      pulseSpeed: 0.01 + Math.random() * 0.02,
+    });
+  }
+}
+
+function animateBgParticles() {
+  bgCtx.clearRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+  for (const p of bgParticles) {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.pulse += p.pulseSpeed;
+
+    // 环绕边界
+    if (p.x < 0) p.x = bgCanvas.width;
+    if (p.x > bgCanvas.width) p.x = 0;
+    if (p.y < 0) p.y = bgCanvas.height;
+    if (p.y > bgCanvas.height) p.y = 0;
+
+    const currentAlpha = p.alpha * (0.5 + 0.5 * Math.sin(p.pulse));
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    bgCtx.fillStyle = p.color;
+    bgCtx.globalAlpha = currentAlpha;
+    bgCtx.fill();
+
+    // 光晕效果
+    bgCtx.beginPath();
+    bgCtx.arc(p.x, p.y, p.size * 3, 0, Math.PI * 2);
+    bgCtx.fillStyle = p.color;
+    bgCtx.globalAlpha = currentAlpha * 0.15;
+    bgCtx.fill();
+  }
+
+  // 绘制连线（距离近的粒子之间）
+  bgCtx.globalAlpha = 1;
+  for (let i = 0; i < bgParticles.length; i++) {
+    for (let j = i + 1; j < bgParticles.length; j++) {
+      const dx = bgParticles[i].x - bgParticles[j].x;
+      const dy = bgParticles[i].y - bgParticles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 120) {
+        bgCtx.beginPath();
+        bgCtx.moveTo(bgParticles[i].x, bgParticles[i].y);
+        bgCtx.lineTo(bgParticles[j].x, bgParticles[j].y);
+        bgCtx.strokeStyle = bgParticles[i].color;
+        bgCtx.globalAlpha = 0.05 * (1 - dist / 120);
+        bgCtx.lineWidth = 0.5;
+        bgCtx.stroke();
+      }
+    }
+  }
+
+  bgCtx.globalAlpha = 1;
+  requestAnimationFrame(animateBgParticles);
+}
+
+initBgParticles();
+animateBgParticles();
+
 // ============ Event Listeners ============
 document.getElementById('btn-restart').addEventListener('click', restartGame);
 document.getElementById('btn-hint').addEventListener('click', showHint);
 document.getElementById('btn-shuffle').addEventListener('click', shuffleBoard);
+document.getElementById('btn-freeze').addEventListener('click', activateFreeze);
+document.getElementById('btn-bomb').addEventListener('click', activateBomb);
 
 // 棋盘级事件委托：点击间隙也能命中最近的卡片
 boardEl.addEventListener('pointerdown', (e) => {
@@ -2603,6 +2422,7 @@ restartGame();
 window.addEventListener('resize', () => {
   resizeBoardContainer();
   refreshAllSprites();
+  initBgParticles();
 });
 
 // 页面加载完成后再次检查尺寸
@@ -2612,7 +2432,7 @@ window.addEventListener('load', () => {
     refreshAllSprites();
   }, 100);
 });
-</script>
 
+</script>
 </body>
 </html>
