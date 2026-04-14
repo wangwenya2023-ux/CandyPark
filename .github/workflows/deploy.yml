@@ -210,7 +210,7 @@ jobs:
         run: |
           echo "📏 正在检查文件大小..."
           # 检查 HTML 文件大小是否合理（不超过 500KB）
-          FILE_SIZE=$(stat -f%z index.html 2>/dev/null || stat -c%s index.html 2>/dev/null)
+          FILE_SIZE=$(stat -c%s index.html 2>/dev/null || stat -f%z index.html 2>/dev/null)
           FILE_SIZE_KB=$((FILE_SIZE / 1024))
           echo "📄 index.html 大小: ${FILE_SIZE_KB}KB"
 
@@ -220,14 +220,16 @@ jobs:
 
           # 检查图片文件总大小
           TOTAL_IMG_SIZE=0
-          for img in *.png *.jpg *.jpeg *.gif *.webp *.svg 2>/dev/null; do
+          shopt -s nullglob
+          for img in *.png *.jpg *.jpeg *.gif *.webp *.svg; do
             if [ -f "$img" ]; then
-              IMG_SIZE=$(stat -f%z "$img" 2>/dev/null || stat -c%s "$img" 2>/dev/null)
+              IMG_SIZE=$(stat -c%s "$img" 2>/dev/null || stat -f%z "$img" 2>/dev/null)
               IMG_SIZE_MB=$((IMG_SIZE / 1024 / 1024))
               echo "🖼️ $img: ${IMG_SIZE_MB}MB"
               TOTAL_IMG_SIZE=$((TOTAL_IMG_SIZE + IMG_SIZE))
             fi
           done
+          shopt -u nullglob
 
           TOTAL_MB=$((TOTAL_IMG_SIZE / 1024 / 1024))
           echo "📊 图片资源总大小: ${TOTAL_MB}MB"
