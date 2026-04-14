@@ -1432,6 +1432,7 @@ const TYPE_COLORS = [
 ];
 
 // 给弹出的表情动态设置匹配卡片颜色的精致样式
+// 注意：不能用 background 简写，否则会覆盖 background-image 精灵图！
 function applyPopOutStyle(tileEl, type) {
   if (!tileEl) return;
   const colors = TYPE_COLORS[type] || ['#fff', '#ffd700', '#ffab91'];
@@ -1441,8 +1442,8 @@ function applyPopOutStyle(tileEl, type) {
   const main = colors[1];    // 主色
   const bg = colors[2];      // 背景色
   sprite.style.border = `3.5px solid rgba(255,255,255,0.85)`;
-  sprite.style.background = `linear-gradient(145deg, ${bg} 0%, ${light} 40%, ${bg} 100%)`;
-  sprite.style.boxShadow = `0 6px 22px ${main}66, 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.6), 0 0 16px ${light}44`;
+  sprite.style.backgroundColor = bg;
+  sprite.style.boxShadow = `0 6px 22px ${main}66, 0 2px 8px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -2px 6px ${light}88, 0 0 16px ${light}44`;
 }
 
 // 给欢庆阶段的表情设置更强烈的发光效果
@@ -1455,8 +1456,8 @@ function applyMatchCelebrateStyle(tileEl, type) {
   const main = colors[1];
   const bg = colors[2];
   sprite.style.border = `3.5px solid rgba(255,255,255,0.9)`;
-  sprite.style.background = `linear-gradient(145deg, ${bg} 0%, ${light} 40%, ${bg} 100%)`;
-  sprite.style.boxShadow = `0 8px 30px ${main}77, 0 3px 12px rgba(0,0,0,0.12), 0 0 24px ${light}55, inset 0 1px 0 rgba(255,255,255,0.7)`;
+  sprite.style.backgroundColor = bg;
+  sprite.style.boxShadow = `0 8px 30px ${main}77, 0 3px 12px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.7), inset 0 -3px 8px ${light}88, 0 0 24px ${light}55`;
 }
 
 // 清除弹出表情的动态样式
@@ -1465,7 +1466,7 @@ function clearPopOutStyle(tileEl) {
   const sprite = tileEl.querySelector('.emoji-sprite');
   if (!sprite) return;
   sprite.style.border = '';
-  sprite.style.background = '';
+  sprite.style.backgroundColor = '';
   sprite.style.boxShadow = '';
 }
 
