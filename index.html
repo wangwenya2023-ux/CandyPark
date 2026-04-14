@@ -410,69 +410,78 @@
     transition: overflow 0s;
   }
 
-  /* ===== 表情弹出效果：第二次点击时表情跳出卡片框 ===== */
-  .tile.emoji-pop-out {
-    overflow: visible !important;
-    z-index: 50 !important;
-  }
-  .tile.emoji-pop-out .tile-avatar {
+  /* ===== 表情弹出效果：匹配时表情跳出卡片框（带精致边框装饰） ===== */
+  .tile.emoji-pop-out,
+  .tile.emoji-pop-out-first,
+  .tile.emoji-match-celebrate {
     overflow: visible !important;
   }
+  .tile.emoji-pop-out { z-index: 50 !important; }
+  .tile.emoji-pop-out-first { z-index: 45 !important; }
+  .tile.emoji-match-celebrate { z-index: 55 !important; }
+
+  .tile.emoji-pop-out .tile-avatar,
+  .tile.emoji-pop-out-first .tile-avatar,
+  .tile.emoji-match-celebrate .tile-avatar {
+    overflow: visible !important;
+  }
+
+  /* 弹出的表情精致卡片样式：圆角 + 边框 + 背景 + 阴影 */
+  .tile.emoji-pop-out .emoji-sprite,
+  .tile.emoji-pop-out-first .emoji-sprite {
+    border-radius: 16px;
+    border: 3px solid rgba(255,255,255,0.9);
+    background: linear-gradient(145deg, rgba(255,245,250,0.95) 0%, rgba(255,230,240,0.9) 100%);
+    box-shadow:
+      0 6px 20px rgba(255,105,180,0.35),
+      0 2px 8px rgba(0,0,0,0.12),
+      inset 0 1px 0 rgba(255,255,255,0.5);
+  }
+
   .tile.emoji-pop-out .emoji-sprite {
     animation: emojiPopOut 0.55s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     z-index: 60 !important;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.25));
-  }
-
-  /* 第一个选中的棋子也加弹出效果 */
-  .tile.emoji-pop-out-first {
-    overflow: visible !important;
-    z-index: 45 !important;
-  }
-  .tile.emoji-pop-out-first .tile-avatar {
-    overflow: visible !important;
   }
   .tile.emoji-pop-out-first .emoji-sprite {
     animation: emojiPopOutFirst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     z-index: 55 !important;
-    filter: drop-shadow(0 3px 8px rgba(0,0,0,0.2));
   }
 
   @keyframes emojiPopOut {
-    0%   { transform: scale(1) translateY(0) rotate(0deg); }
-    25%  { transform: scale(1.35) translateY(-18%) rotate(-5deg); }
-    45%  { transform: scale(1.55) translateY(-30%) rotate(4deg); }
-    65%  { transform: scale(1.45) translateY(-25%) rotate(-2deg); }
-    80%  { transform: scale(1.50) translateY(-28%) rotate(1deg); }
-    100% { transform: scale(1.45) translateY(-25%) rotate(0deg); }
+    0%   { transform: scale(1) translateY(0) rotate(0deg); filter: brightness(1); }
+    25%  { transform: scale(1.35) translateY(-18%) rotate(-5deg); filter: brightness(1.05); }
+    45%  { transform: scale(1.55) translateY(-30%) rotate(4deg); filter: brightness(1.08); }
+    65%  { transform: scale(1.45) translateY(-25%) rotate(-2deg); filter: brightness(1.05); }
+    80%  { transform: scale(1.50) translateY(-28%) rotate(1deg); filter: brightness(1.06); }
+    100% { transform: scale(1.45) translateY(-25%) rotate(0deg); filter: brightness(1.05); }
   }
 
   @keyframes emojiPopOutFirst {
-    0%   { transform: scale(1) translateY(0) rotate(0deg); }
-    30%  { transform: scale(1.30) translateY(-15%) rotate(5deg); }
-    55%  { transform: scale(1.40) translateY(-22%) rotate(-3deg); }
-    75%  { transform: scale(1.35) translateY(-20%) rotate(1deg); }
-    100% { transform: scale(1.35) translateY(-18%) rotate(0deg); }
+    0%   { transform: scale(1) translateY(0) rotate(0deg); filter: brightness(1); }
+    30%  { transform: scale(1.30) translateY(-15%) rotate(5deg); filter: brightness(1.05); }
+    55%  { transform: scale(1.40) translateY(-22%) rotate(-3deg); filter: brightness(1.08); }
+    75%  { transform: scale(1.35) translateY(-20%) rotate(1deg); filter: brightness(1.05); }
+    100% { transform: scale(1.35) translateY(-18%) rotate(0deg); filter: brightness(1.05); }
   }
 
   /* 匹配成功时两个表情一起欢快弹跳然后消失 */
-  .tile.emoji-match-celebrate {
-    overflow: visible !important;
-    z-index: 55 !important;
-  }
-  .tile.emoji-match-celebrate .tile-avatar {
-    overflow: visible !important;
-  }
   .tile.emoji-match-celebrate .emoji-sprite {
+    border-radius: 16px;
+    border: 3px solid rgba(255,255,255,0.9);
+    background: linear-gradient(145deg, rgba(255,245,250,0.95) 0%, rgba(255,230,240,0.9) 100%);
+    box-shadow:
+      0 8px 28px rgba(255,105,180,0.45),
+      0 3px 10px rgba(0,0,0,0.15),
+      0 0 20px rgba(255,182,218,0.4);
     animation: emojiMatchCelebrate 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
     z-index: 60 !important;
   }
 
   @keyframes emojiMatchCelebrate {
-    0%   { transform: scale(1.45) translateY(-25%) rotate(0deg); opacity: 1; }
-    30%  { transform: scale(1.65) translateY(-40%) rotate(-8deg); opacity: 1; }
-    60%  { transform: scale(1.55) translateY(-35%) rotate(6deg); opacity: 0.8; }
-    100% { transform: scale(0.3) translateY(-60%) rotate(15deg); opacity: 0; }
+    0%   { transform: scale(1.45) translateY(-25%) rotate(0deg); opacity: 1; filter: brightness(1.1); }
+    30%  { transform: scale(1.65) translateY(-40%) rotate(-8deg); opacity: 1; filter: brightness(1.15) saturate(1.2); }
+    60%  { transform: scale(1.55) translateY(-35%) rotate(6deg); opacity: 0.8; filter: brightness(1.1); }
+    100% { transform: scale(0.3) translateY(-60%) rotate(15deg); opacity: 0; filter: brightness(1.2); }
   }
 
   .tile .emoji-sprite {
