@@ -1,0 +1,2317 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍭 Candy Park · Tap, Listen & Match</title>
+<!-- Google Fonts: Fredoka One (title) + Nunito (body) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    /* Candy Park Palette - warm, harmonious, soft */
+    --bg-top: #fce4ec;
+    --bg-mid: #f8bbd0;
+    --bg-bot: #f48fb1;
+    --cream: #fff8e7;
+    --cream-dark: #f5e6c8;
+    --board-bg: #fef9f0;
+    --board-border: #e8c896;
+    --board-shadow: #d4a96a;
+    --text-dark: #5d4037;
+    --text-warm: #8d6e63;
+    --gold: #ff69b4;
+    --gold-dark: #f06292;
+    --pink-soft: #f48fb1;
+    --green-soft: #a5d6a7;
+    --blue-soft: #90caf9;
+  }
+
+  body {
+    background: url('1776064614442642.png') center center / cover no-repeat fixed;
+    background-color: #f8bbd0; /* 图片加载前的底色 */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Nunito', 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* ===== Candy Park Background Overlay ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    /* 轻微的半透明叠加，让背景图和UI更融合 */
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.08) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Floating candy decorations - 背景图已有装饰，隐藏emoji */
+  .deco {
+    display: none;
+  }
+
+  /* ===== Title Banner - 参考设计稿的卡通Logo ===== */
+  .title-banner {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+  }
+
+  /* 不使用UI框背景，Logo直接浮在背景上 */
+  .title-banner::before {
+    display: none;
+  }
+
+  /* Logo文字容器 */
+  .title-banner h1 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3.2rem;
+    line-height: 1.05;
+    letter-spacing: 3px;
+    text-align: center;
+    /* 粉色到浅蓝的渐变 — 模仿参考图 */
+    background: linear-gradient(180deg, #ffb6d9 0%, #f48fb1 35%, #e991c5 55%, #c5a3d9 75%, #a8d8ea 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    /* 白色粗描边 — 卡通立体感 */
+    -webkit-text-stroke: 3px rgba(255,255,255,0.95);
+    paint-order: stroke fill;
+    text-shadow: none;
+    /* 多层阴影：深色外阴影 + 柔和光晕 */
+    filter:
+      drop-shadow(0 3px 0 rgba(180,120,160,0.5))
+      drop-shadow(0 6px 12px rgba(180,100,140,0.3))
+      drop-shadow(0 0 24px rgba(255,182,217,0.4));
+  }
+
+  /* 棒棒糖装饰 */
+  .title-banner .logo-deco {
+    position: absolute;
+    font-size: 2rem;
+    z-index: 2;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
+    pointer-events: none;
+  }
+  .title-banner .logo-deco.left {
+    left: -28px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-15deg);
+  }
+  .title-banner .logo-deco.right {
+    right: -28px;
+    top: 50%;
+    transform: translateY(-50%) rotate(15deg) scaleX(-1);
+  }
+
+  .subtitle {
+    font-family: 'Nunito', sans-serif;
+    color: #fff;
+    margin-bottom: 6px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    z-index: 1;
+    text-shadow:
+      0 2px 0 rgba(160,100,140,0.4),
+      0 2px 8px rgba(0,0,0,0.2),
+      0 0 16px rgba(255,182,217,0.3);
+    letter-spacing: 2.5px;
+  }
+
+  /* ===== Timer Bar ===== */
+  .timer-bar-container {
+    width: auto;
+    height: 14px;
+    background: rgba(255,255,255,0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255,255,255,0.6);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+    z-index: 1;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  }
+
+  .timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #f8bbd0 0%, #f48fb1 50%, #f06292 100%);
+    border-radius: 7px;
+    transition: width 0.5s linear;
+    width: 100%;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
+  }
+
+  .timer-bar.danger {
+    background: linear-gradient(90deg, #ef9a9a 0%, #ef5350 50%, #e53935 100%);
+    animation: timerPulse 0.6s ease infinite;
+  }
+
+  @keyframes timerPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.65; }
+  }
+
+  /* ===== Score Panel - 整体白色半透明圆角条 ===== */
+  .score-panel {
+    display: flex;
+    gap: 0;
+    margin-bottom: 8px;
+    z-index: 1;
+    justify-content: center;
+    flex-wrap: nowrap;
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 28px;
+    padding: 6px 10px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08), inset 0 1px 0 rgba(255,255,255,0.5);
+    border: 1.5px solid rgba(255,255,255,0.6);
+  }
+
+  .score-item {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 4px 14px;
+    color: var(--text-dark);
+    font-size: 0.85rem;
+    font-weight: 800;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    border-right: 1.5px solid rgba(0,0,0,0.08);
+  }
+
+  .score-item:last-child {
+    border-right: none;
+  }
+
+  .score-item .label {
+    opacity: 0.65;
+    font-weight: 700;
+    font-size: 0.78rem;
+  }
+
+  .score-item .value {
+    color: #e91e63;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    margin-left: 3px;
+  }
+
+  /* ===== Game Board - 完全不透明实色背景 ===== */
+  #game-board {
+    position: relative;
+    border-radius: 16px;
+    background: #fdeef4;
+    overflow: visible;
+    z-index: 20;
+    padding: 8px;
+    /* 触控优化：棋盘区域全局消除延迟 */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+  }
+
+  /* Subtle inner border - 已移除（棋盘透明，无需内边框） */
+
+  /* ===== UI框装饰容器 ===== */
+  .board-frame {
+    position: relative;
+    display: inline-block;
+    padding: 0;
+    background: none;
+  }
+
+  /* ===== Tiles - Soft candy pastels ===== */
+  .tile {
+    position: absolute;
+    cursor: pointer;
+    transition: transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.25s ease, filter 0.1s ease;
+    border-radius: 18px;
+    border: 3px solid transparent;
+    overflow: hidden;          /* 统一裁切，内容不溢出 */
+    z-index: 1;
+    will-change: transform;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    /* 触控优化：消除延迟、禁止选中、去掉默认高亮 */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* 9 harmonious candy colors - soft pastels with gentle contrast */
+  .tile[data-type="0"] {
+    /* Strawberry Pink */
+    border-color: #f06292;
+    background: linear-gradient(145deg, #f8a4c0 0%, #f06292 50%, #e04878 100%);
+    box-shadow: 0 3px 8px rgba(240,98,146,0.35);
+  }
+  .tile[data-type="1"] {
+    /* Tangerine Orange */
+    border-color: #ffb74d;
+    background: linear-gradient(145deg, #ffd699 0%, #ffb74d 50%, #ffa726 100%);
+    box-shadow: 0 3px 8px rgba(255,183,77,0.35);
+  }
+  .tile[data-type="2"] {
+    /* Mint Candy - 薄荷糖奶绿，去掉实心按钮感 */
+    border-color: #a8d8b0;
+    background: linear-gradient(145deg, #d4eedb 0%, #b8dfc0 50%, #9ecfaa 100%);
+    box-shadow: 0 3px 8px rgba(158,207,170,0.32);
+  }
+  .tile[data-type="3"] {
+    /* Blueberry */
+    border-color: #64b5f6;
+    background: linear-gradient(145deg, #a3d5ff 0%, #64b5f6 50%, #42a5f5 100%);
+    box-shadow: 0 3px 8px rgba(100,181,246,0.35);
+  }
+  .tile[data-type="4"] {
+    /* Grape Purple */
+    border-color: #ba68c8;
+    background: linear-gradient(145deg, #d7a0e0 0%, #ba68c8 50%, #ab47bc 100%);
+    box-shadow: 0 3px 8px rgba(186,104,200,0.35);
+  }
+  .tile[data-type="5"] {
+    /* Bubblegum Rose */
+    border-color: #f48fb1;
+    background: linear-gradient(145deg, #f8bbd0 0%, #f48fb1 50%, #ec407a 100%);
+    box-shadow: 0 3px 8px rgba(244,143,177,0.35);
+  }
+  .tile[data-type="6"] {
+    /* Cotton Candy Cyan */
+    border-color: #4dd0e1;
+    background: linear-gradient(145deg, #99e5ed 0%, #4dd0e1 50%, #26c6da 100%);
+    box-shadow: 0 3px 8px rgba(77,208,225,0.35);
+  }
+  .tile[data-type="7"] {
+    /* Lemon Yellow */
+    border-color: #ffd54f;
+    background: linear-gradient(145deg, #ffe88a 0%, #ffd54f 50%, #ffca28 100%);
+    box-shadow: 0 3px 8px rgba(255,213,79,0.35);
+  }
+  .tile[data-type="8"] {
+    /* Peach Coral */
+    border-color: #ff8a65;
+    background: linear-gradient(145deg, #ffb89a 0%, #ff8a65 50%, #ff7043 100%);
+    box-shadow: 0 3px 8px rgba(255,138,101,0.35);
+  }
+
+  /* Candy shine - 柔和的光泽效果 */
+  .tile::before {
+    content: '';
+    position: absolute;
+    top: 3px; left: 10%;
+    width: 80%; height: 18%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 60%, transparent 100%);
+    border-radius: 10px 10px 50% 50%;
+    pointer-events: none;
+    z-index: 20;
+  }
+
+  .tile:hover {
+    transform: scale(1.11) translateY(-3px);
+    z-index: 10;
+    filter: brightness(1.05) saturate(1.10);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
+  }
+
+  /* 鼠标悬停时切换为动态表情图 */
+  .tile:hover .emoji-sprite {
+    background-image: url('1776060717188131.png') !important;
+  }
+
+  .tile.selected {
+    border-color: #fff !important;
+    box-shadow:
+      0 0 0 3px #ff69b4,
+      0 0 18px 4px rgba(255,105,180,0.45),
+      0 0 36px 8px rgba(255,105,180,0.15),
+      0 8px 24px rgba(0,0,0,0.15) !important;
+    transform: scale(1.18) translateY(-6px);
+    z-index: 20;
+    filter: brightness(1.08) saturate(1.15) drop-shadow(0 0 6px rgba(255,105,180,0.4));
+    animation: selectedPulse 0.7s ease-in-out infinite;
+  }
+
+  /* 选中时也保持动态表情图 */
+  .tile.selected .emoji-sprite {
+    background-image: url('1776060717188131.png') !important;
+  }
+
+  @keyframes selectedPulse {
+    0%, 100% {
+      transform: scale(1.18) translateY(-6px);
+      box-shadow:
+        0 0 0 3px #ff69b4,
+        0 0 18px 4px rgba(255,105,180,0.45),
+        0 0 36px 8px rgba(255,105,180,0.15),
+        0 8px 24px rgba(0,0,0,0.15) !important;
+    }
+    50% {
+      transform: scale(1.13) translateY(-4px);
+      box-shadow:
+        0 0 0 2.5px #ff69b4,
+        0 0 12px 2px rgba(255,105,180,0.30),
+        0 0 24px 4px rgba(255,105,180,0.10),
+        0 5px 16px rgba(0,0,0,0.10) !important;
+    }
+  }
+
+  .tile:active {
+    transform: scale(0.88) !important;
+    transition-duration: 0.04s !important;
+    filter: brightness(0.92) !important;
+  }
+
+  .tile.matched {
+    animation: candyPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+
+  @keyframes candyPop {
+    0%   { transform: scale(1.0);  opacity: 1;   filter: brightness(1); }
+    15%  { transform: scale(1.20) rotate(3deg);  opacity: 1;   filter: brightness(1.15) saturate(1.2); }
+    30%  { transform: scale(1.30) rotate(-2deg); opacity: 0.85; filter: brightness(1.10) saturate(1.1); }
+    55%  { transform: scale(1.20) rotate(1deg);  opacity: 0.5; filter: brightness(1.05); }
+    100% { transform: scale(0)    rotate(8deg);  opacity: 0;   filter: brightness(1); }
+  }
+
+  /* ===== 卡片内部结构 ===== */
+
+  /* 头像区：占卡片上方 84%，表情是主视觉 */
+  .tile-avatar {
+    flex: 0 0 84%;
+    position: relative;
+    overflow: hidden;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .tile .emoji-sprite {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-image: url('1774611396101205.png');
+    background-repeat: no-repeat;
+    image-rendering: auto;
+    z-index: 4;
+    border-radius: 0;
+    /* background-size 和 background-position 由 JS 精确计算像素值 */
+  }
+
+  /* 标签区：占卡片下方 16%，轻薄辅助色条 */
+  .tile-label {
+    flex: 0 0 16%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.14);
+    padding: 0 3px;
+    overflow: hidden;
+  }
+
+  .tile-label span {
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.52rem;
+    font-weight: 600;
+    color: rgba(255,255,255,0.88);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.28);
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1;
+    text-transform: uppercase;
+  }
+
+
+
+  /* ===== Floating Score ===== */
+  .float-score {
+    position: absolute;
+    color: #e91e63;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    pointer-events: none;
+    z-index: 100;
+    animation: scoreFloat 1s cubic-bezier(0, 0.5, 0.5, 1) forwards;
+    text-shadow: 0 2px 0 rgba(255,255,255,0.8), 0 0 10px rgba(255,105,180,0.4);
+  }
+
+  @keyframes scoreFloat {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    20% { transform: translateY(-10px) scale(1.3); opacity: 1; }
+    40% { transform: translateY(-25px) scale(1); opacity: 1; }
+    100% { transform: translateY(-65px) scale(0.8); opacity: 0; }
+  }
+
+  /* ===== Combo Text ===== */
+  .combo-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.6rem;
+    pointer-events: none;
+    z-index: 200;
+    text-shadow:
+      0 3px 0 #f06292,
+      0 0 20px rgba(255,105,180,0.6);
+    -webkit-text-stroke: 1px #f06292;
+    animation: comboBlast 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    white-space: nowrap;
+  }
+
+  @keyframes comboBlast {
+    0% { transform: translate(-50%, -50%) scale(0) rotate(-8deg); opacity: 0; }
+    20% { transform: translate(-50%, -50%) scale(1.3) rotate(4deg); opacity: 1; }
+    40% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    80% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(0.5) rotate(0deg); opacity: 0; }
+  }
+
+  /* ===== Hint ===== */
+  @keyframes hintPulse {
+    0%, 100% { filter: brightness(1); transform: scale(1); }
+    50% { filter: brightness(1.10) saturate(1.15); transform: scale(1.04); box-shadow: 0 0 16px rgba(255,193,7,0.45) !important; }
+  }
+
+  .tile.hint {
+    animation: hintPulse 0.8s ease infinite;
+    z-index: 15;
+  }
+
+  /* ===== Buttons - Candy Park style ===== */
+  .btn-bar {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    z-index: 1;
+  }
+
+  .btn-bar button {
+    font-family: 'Nunito', sans-serif;
+    padding: 10px 26px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 24px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 1px;
+    transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* Glossy top shine on buttons */
+  .btn-bar button::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+    border-radius: 20px 20px 50% 50%;
+    pointer-events: none;
+  }
+
+  .btn-bar button:hover {
+    transform: translateY(-2px) scale(1.04);
+  }
+
+  .btn-bar button:active {
+    transform: translateY(1px) scale(0.97);
+  }
+
+  #btn-restart {
+    background: linear-gradient(180deg, #ff9a9e 0%, #f06292 100%);
+    border-color: #ec407a;
+    box-shadow: 0 3px 14px rgba(240,98,146,0.35);
+  }
+
+  #btn-hint {
+    background: linear-gradient(180deg, #a8e6cf 0%, #66bb6a 100%);
+    border-color: #4caf50;
+    box-shadow: 0 3px 14px rgba(102,187,106,0.3);
+  }
+
+  #btn-shuffle {
+    background: linear-gradient(180deg, #a0c4ff 0%, #7c9ff5 100%);
+    border-color: #5c85e6;
+    box-shadow: 0 3px 14px rgba(124,159,245,0.35);
+  }
+
+  /* ===== Canvas layers ===== */
+  #link-canvas {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  #particle-canvas {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    pointer-events: none;
+    z-index: 99;
+  }
+
+  /* ===== Overlay - Candy Park popup ===== */
+  .overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .overlay-box {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 32px;
+    padding: 36px 56px;
+    text-align: center;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5);
+    position: relative;
+  }
+
+  .overlay h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, #ff69b4 0%, #e91e63 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(233,30,99,0.2));
+  }
+
+  .overlay p {
+    font-family: 'Nunito', sans-serif;
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 22px;
+  }
+
+  .overlay button {
+    font-family: 'Nunito', sans-serif;
+    padding: 12px 44px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-radius: 24px;
+    font-size: 1rem;
+    cursor: pointer;
+    color: #fff;
+    font-weight: 800;
+    background: linear-gradient(180deg, #ff9a9e 0%, #f06292 100%);
+    box-shadow: 0 4px 16px rgba(240,98,146,0.35);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.15s;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 1px;
+  }
+
+  .overlay button::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 45%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, transparent 100%);
+    pointer-events: none;
+    border-radius: 20px 20px 50% 50%;
+  }
+
+  .overlay button:hover {
+    transform: scale(1.05);
+  }
+
+  /* ===== Tile micro-shake (mismatch, non-blocking) ===== */
+  @keyframes tileWiggle {
+    0%   { transform: translateX(0)   scale(1); }
+    18%  { transform: translateX(-5px) scale(1.05); }
+    40%  { transform: translateX(4px)  scale(1.02); }
+    62%  { transform: translateX(-3px) scale(1.01); }
+    80%  { transform: translateX(2px); }
+    100% { transform: translateX(0)   scale(1); }
+  }
+
+  @keyframes tileRedFlash {
+    0%   { box-shadow: 0 0 0 0px   rgba(239,83,80,0),    inset 0 0 0 0 rgba(239,83,80,0); }
+    25%  { box-shadow: 0 0 0 3.5px rgba(239,83,80,0.9),  inset 0 0 8px rgba(239,83,80,0.25); }
+    60%  { box-shadow: 0 0 0 2px   rgba(239,83,80,0.5),  inset 0 0 4px rgba(239,83,80,0.1); }
+    100% { box-shadow: 0 0 0 0px   rgba(239,83,80,0),    inset 0 0 0 0 rgba(239,83,80,0); }
+  }
+
+  .tile-wiggle {
+    animation: tileWiggle 0.30s cubic-bezier(0.36,0.07,0.19,0.97) both,
+               tileRedFlash 0.40s ease both;
+  }
+
+  /* ===== Match Toast Feedback (居中弹出可爱表情+单词) ===== */
+  .match-toast-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 200;
+    pointer-events: none;
+  }
+
+  .match-toast {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 28px;
+    padding: 18px 32px 14px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12), inset 0 1px 0 rgba(255,255,255,0.5);
+    opacity: 0;
+    transform: scale(0.3);
+    transition: opacity 0.15s ease, transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .match-toast.show {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .match-toast.fade-out {
+    opacity: 0;
+    transform: scale(0.6) translateY(-20px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+
+  .match-toast .toast-emoji {
+    width: 64px; height: 64px;
+    border-radius: 16px;
+    border: 2px solid rgba(255,255,255,0.6);
+    overflow: hidden;
+    flex-shrink: 0;
+    animation: toastBounce 0.5s cubic-bezier(0.34,1.56,0.64,1);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+  }
+
+  @keyframes toastBounce {
+    0% { transform: scale(0.2) rotate(-15deg); }
+    50% { transform: scale(1.15) rotate(5deg); }
+    70% { transform: scale(0.95) rotate(-2deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
+
+  .match-toast .toast-emoji .emoji-sprite {
+    width: 100%; height: 100%;
+    background-image: url('1774611396101205.png');
+    background-size: 300% 300%;
+    image-rendering: auto;
+  }
+
+  .match-toast .toast-word {
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #e91e63;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.7);
+    letter-spacing: 1px;
+    animation: wordPop 0.4s 0.1s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  @keyframes wordPop {
+    0% { opacity: 0; transform: translateY(10px) scale(0.8); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .match-toast .toast-meaning {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #a1887f;
+    animation: wordPop 0.4s 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+</style>
+</head>
+<body>
+
+<!-- Candy Park floating decorations -->
+<div class="deco float1" style="top:5%;left:4%;font-size:2.2rem;">🍭</div>
+<div class="deco float2" style="top:12%;left:88%;font-size:1.8rem;">🍬</div>
+<div class="deco float3" style="top:70%;left:6%;font-size:2rem;">🧁</div>
+<div class="deco float1" style="top:78%;left:92%;font-size:1.6rem;animation-delay:1s;">🍩</div>
+<div class="deco float2" style="top:3%;left:42%;font-size:1.5rem;animation-delay:0.5s;">☁️</div>
+<div class="deco float3" style="top:88%;left:48%;font-size:1.4rem;animation-delay:1.5s;">🌈</div>
+<div class="deco float1" style="top:35%;left:2%;font-size:1.6rem;animation-delay:2s;">🍪</div>
+<div class="deco float2" style="top:42%;left:96%;font-size:1.8rem;animation-delay:0.8s;">🎀</div>
+<div class="deco float3" style="top:55%;left:5%;font-size:1.3rem;animation-delay:1.2s;">⭐</div>
+<div class="deco float1" style="top:20%;left:94%;font-size:1.4rem;animation-delay:0.3s;">🍰</div>
+
+<div class="title-banner">
+  <span class="logo-deco left">🍭</span>
+  <h1>Candy<br>Park</h1>
+  <span class="logo-deco right">🍭</span>
+</div>
+<p class="subtitle">Tap, Listen & Match</p>
+
+<div class="timer-bar-container">
+  <div class="timer-bar" id="timer-bar"></div>
+</div>
+
+<div class="score-panel">
+  <div class="score-item"><span class="label">📋 关卡</span><span class="value" id="level">1 / 3</span></div>
+  <div class="score-item"><span class="label">🏆 分数</span><span class="value" id="score">0</span></div>
+  <div class="score-item"><span class="label">🎯 剩余</span><span class="value" id="remaining">0</span></div>
+  <div class="score-item"><span class="label">⏱ 时间</span><span class="value" id="timer">120</span>s</div>
+  <div class="score-item"><span class="label">🔥 连击</span><span class="value" id="combo">0</span></div>
+</div>
+
+<div class="match-toast-container" id="match-toast-container"></div>
+<div class="board-frame">
+  <div id="game-board">
+    <canvas id="link-canvas"></canvas>
+    <canvas id="particle-canvas"></canvas>
+  </div>
+</div>
+
+<div class="btn-bar">
+  <button id="btn-restart">🔄 重新开始</button>
+  <button id="btn-hint">💡 提示</button>
+  <button id="btn-shuffle">🔀 洗牌</button>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="overlay-box">
+    <h2 id="overlay-title">🎉 恭喜通关！</h2>
+    <p id="overlay-text">最终得分：<span id="final-score">0</span></p>
+    <button id="overlay-btn">🍭 再来一局</button>
+  </div>
+</div>
+
+<script>
+// ============ Game Config ============
+let INNER_ROWS = 4;
+let INNER_COLS = 4;
+let ROWS = INNER_ROWS + 2;
+let COLS = INNER_COLS + 2;
+const TILE_SIZE = 76;
+const GAP = 6;
+const CELL = TILE_SIZE + GAP;
+const NUM_TYPES = 9;
+const GAME_TIME = 120;
+
+// ============ Level System ============
+const LEVELS = [
+  // 教学关：牌少、时间宽松、语音慢、提示冷却短
+  { name: 'Level 1', emoji: '🌱', types: [0, 1, 2],               time: 120, label: '初识情绪', rows: 4, cols: 4,
+    speechRate: 0.78, hintCooldown: 4000,  autoShuffleDelay: 8000,
+    desc: '认识 3 种情绪 · 慢慢来 😊' },
+  // 正常关：数量提升、节奏正常
+  { name: 'Level 2', emoji: '🌸', types: [0, 1, 2, 3, 4, 5],     time: 110, label: '情绪进阶', rows: 6, cols: 6,
+    speechRate: 0.88, hintCooldown: 7000,  autoShuffleDelay: 12000,
+    desc: '6 种情绪 · 节奏加快 🌸' },
+  // 挑战关：时间紧、语音快、提示冷却长、自动洗牌更慢
+  { name: 'Level 3', emoji: '🌟', types: [0, 1, 2, 3, 4, 5, 6, 7, 8], time: 90, label: '情绪大师', rows: 6, cols: 8,
+    speechRate: 1.05, hintCooldown: 12000, autoShuffleDelay: 18000,
+    desc: '全 9 种 · 限时挑战 ⚡' },
+];
+let currentLevel = 0;
+
+// TTS word mapping - direct clear pronunciation with Chinese meaning
+const EMOJI_DATA = [
+  { word: 'Happy',     zh: '开心的',   pitch: 1.1, rate: 0.9, volume: 1.0 },
+  { word: 'Sad',       zh: '伤心的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
+  { word: 'Angry',     zh: '生气的',   pitch: 1.0, rate: 0.9, volume: 1.0 },
+  { word: 'Surprised', zh: '惊讶的',   pitch: 1.1, rate: 0.85, volume: 1.0 },
+  { word: 'Confused',  zh: '困惑的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
+  { word: 'Scared',    zh: '害怕的',   pitch: 1.1, rate: 0.85, volume: 1.0 },
+  { word: 'Tired',     zh: '疲倦的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
+  { word: 'Smug',      zh: '得意的',   pitch: 1.0, rate: 0.9, volume: 1.0 },
+  { word: 'Pouting',   zh: '嘟嘴的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
+];
+const EMOJI_WORDS = EMOJI_DATA.map(d => d.word);
+
+// ============ Audio Engine (低延迟发音系统) ============
+let audioUnlocked = false;
+let audioCtx = null;
+
+// ===== 选中特效音（Web Audio API 合成，无需外部文件）=====
+function playSelectSfx() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    // 清脆的「叮」音：三个正弦波叠加，更饱满
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
+    const osc3 = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, now);   // A5
+    osc1.frequency.exponentialRampToValueAtTime(1320, now + 0.05);
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(1760, now);  // A6 泛音
+    osc2.frequency.exponentialRampToValueAtTime(2200, now + 0.03);
+    osc3.type = 'triangle';
+    osc3.frequency.setValueAtTime(1100, now);  // 中间泛音，增加厚度
+    osc3.frequency.exponentialRampToValueAtTime(1650, now + 0.04);
+    gain.gain.setValueAtTime(0.22, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc1.connect(gain);
+    osc2.connect(gain);
+    osc3.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc1.start(now); osc2.start(now); osc3.start(now);
+    osc1.stop(now + 0.12); osc2.stop(now + 0.12); osc3.stop(now + 0.12);
+  } catch(e) { /* 静默失败 */ }
+}
+
+// 不匹配时的短促「嗡」音
+function playErrorSfx() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(140, now + 0.1);
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.12);
+  } catch(e) { /* 静默失败 */ }
+}
+
+// 音频预加载缓存：key=word, value=AudioBuffer 或 HTMLAudioElement
+const audioCache = new Map();
+let currentPreloadAbort = null; // 用于取消上一关的预加载
+
+// 解锁音频（Chrome 自动播放策略要求用户交互后才能播放）
+function unlockAudio() {
+  if (audioUnlocked) return;
+  audioUnlocked = true;
+
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  } catch (e) {}
+
+  // 预热 Audio 元素
+  try {
+    const s = new Audio('data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=');
+    s.volume = 0;
+    s.play().catch(() => {});
+  } catch (e) {}
+
+  document.removeEventListener('click', unlockAudio);
+  document.removeEventListener('touchstart', unlockAudio);
+}
+
+document.addEventListener('click', unlockAudio, { once: false });
+document.addEventListener('touchstart', unlockAudio, { once: false });
+
+// 预加载当前关卡所有单词的音频
+function preloadLevelAudio(levelTypes) {
+  // 取消上一次预加载
+  if (currentPreloadAbort) currentPreloadAbort.abort();
+  const controller = new AbortController();
+  currentPreloadAbort = controller;
+
+  levelTypes.forEach(type => {
+    const word = EMOJI_DATA[type]?.word;
+    if (!word || audioCache.has(word)) return;
+
+    const urls = [
+      `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=1`,
+      `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`,
+    ];
+
+    // 尝试多个音频源预加载
+    function tryPreloadUrl(idx) {
+      if (idx >= urls.length || controller.signal.aborted || audioCache.has(word)) return;
+      const url = urls[idx];
+
+      if (audioCtx) {
+        fetch(url, { signal: controller.signal })
+          .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status} for ${word}`);
+            return r.arrayBuffer();
+          })
+          .then(buf => {
+            if (buf.byteLength < 100) {
+              throw new Error(`音频数据过小(${buf.byteLength}B): ${word}`);
+            }
+            return audioCtx.decodeAudioData(buf);
+          })
+          .then(decoded => {
+            if (!controller.signal.aborted) {
+              audioCache.set(word, { type: 'buffer', data: decoded });
+            }
+          })
+          .catch((err) => {
+            console.warn('[preload] 源' + (idx+1) + '失败:', word, err.message || err);
+            if (idx + 1 < urls.length) {
+              tryPreloadUrl(idx + 1); // 尝试下一个源
+            } else {
+              // 所有源都失败，用最后一个 URL 的 Audio 元素作为备选
+              if (!controller.signal.aborted && !audioCache.has(word)) {
+                const audio = new Audio(urls[0]);
+                audio.preload = 'auto';
+                audio.load();
+                audioCache.set(word, { type: 'element', data: audio });
+              }
+            }
+          });
+      } else {
+        const audio = new Audio(url);
+        audio.preload = 'auto';
+        audio.load();
+        audioCache.set(word, { type: 'element', data: audio });
+      }
+    }
+    tryPreloadUrl(0);
+  });
+}
+
+// 播放单词发音（低延迟，语速跟随关卡配置）
+function speakWord(type) {
+  if (type < 0 || type >= EMOJI_DATA.length) return;
+  const word = EMOJI_DATA[type].word;
+  // 关卡语速覆盖：Level1慢、Level2正常、Level3快
+  const levelRate = LEVELS[currentLevel]?.speechRate ?? EMOJI_DATA[type].rate;
+
+  unlockAudio();
+
+  const cached = audioCache.get(word);
+
+  // 优先使用预加载的 AudioBuffer（延迟最低）
+  if (cached && cached.type === 'buffer' && audioCtx) {
+    try {
+      const source = audioCtx.createBufferSource();
+      source.buffer = cached.data;
+      source.playbackRate.value = levelRate;
+      source.connect(audioCtx.destination);
+      source.start(0);
+      return;
+    } catch (e) {
+      console.warn('[speakWord] AudioBuffer播放失败，回退到Audio元素:', word, e);
+      // buffer 播放失败，清除缓存让后面的逻辑重新创建
+      audioCache.delete(word);
+      // 不return，继续尝试下面的方法
+    }
+  }
+
+  // 其次使用预加载的 Audio 元素
+  if (cached && cached.type === 'element') {
+    try {
+      const el = cached.data;
+      el.currentTime = 0;
+      el.playbackRate = levelRate;
+      el.play().catch((err) => {
+        console.warn('[speakWord] Audio元素播放失败，使用浏览器TTS:', word, err);
+        audioCache.delete(word);
+        speakWordFallbackTTS(word, levelRate);
+      });
+      return;
+    } catch (e) {
+      console.warn('[speakWord] Audio元素异常，回退到新建Audio:', word, e);
+      audioCache.delete(word);
+    }
+  }
+
+  // 都没有缓存时，尝试多个在线发音源
+  const urls = [
+    `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=1`,
+    `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`,
+  ];
+  let urlIdx = 0;
+  function tryPlayUrl() {
+    if (urlIdx >= urls.length) {
+      // 所有在线源都失败，使用浏览器 TTS
+      console.warn('[speakWord] 所有在线源失败，使用浏览器TTS:', word);
+      speakWordFallbackTTS(word, levelRate);
+      return;
+    }
+    try {
+      const url = urls[urlIdx++];
+      const audio = new Audio(url);
+      audio.volume = 1.0;
+      audio.playbackRate = levelRate;
+      audio.addEventListener('error', () => {
+        console.warn('[speakWord] 音频源加载失败，尝试下一个:', word, url);
+        tryPlayUrl();
+      });
+      audio.play().then(() => {
+        // 播放成功，缓存起来
+        audioCache.set(word, { type: 'element', data: audio });
+      }).catch(() => {
+        console.warn('[speakWord] 播放失败，尝试下一个:', word);
+        tryPlayUrl();
+      });
+    } catch (e) {
+      tryPlayUrl();
+    }
+  }
+  tryPlayUrl();
+}
+
+// 浏览器内置 TTS 备用方案（当有道词典不可用时）
+let _ttsVoicesReady = false;
+let _ttsFemaleVoice = null;
+function _initTTSVoices() {
+  if (_ttsVoicesReady) return;
+  const voices = window.speechSynthesis?.getVoices() || [];
+  if (voices.length === 0) return;
+  _ttsVoicesReady = true;
+  // 优先选择英文女声
+  _ttsFemaleVoice = voices.find(v => /female/i.test(v.name) && /en/i.test(v.lang))
+    || voices.find(v => /zira|samantha|karen|victoria|susan|hazel|libby|jenny|aria/i.test(v.name))
+    || voices.find(v => /en[-_]US/i.test(v.lang) && !/male/i.test(v.name))
+    || voices.find(v => /en/i.test(v.lang))
+    || null;
+}
+if ('speechSynthesis' in window) {
+  window.speechSynthesis.addEventListener('voiceschanged', _initTTSVoices);
+  _initTTSVoices();
+}
+
+function speakWordFallbackTTS(word, rate) {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    _initTTSVoices(); // 确保已初始化
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(word);
+    utter.lang = 'en-US';
+    utter.rate = rate || 0.9;
+    utter.pitch = 1.1; // 稍高音调，更接近女声
+    utter.volume = 1.0;
+    if (_ttsFemaleVoice) {
+      utter.voice = _ttsFemaleVoice;
+    }
+    window.speechSynthesis.speak(utter);
+  } catch (e) {
+    console.warn('[TTS fallback] 浏览器TTS也失败:', e);
+  }
+}
+
+// ===== 预加载动态表情图 =====
+const SPRITE_IMG_ACTIVE = new Image();
+SPRITE_IMG_ACTIVE.src = '1776060717188131.png';
+
+// ===== Sprite 精确像素定位系统 =====
+// sprite 图: 4096×4096, 3×3 网格, 每格 ~1365×1365
+const SPRITE_IMG_SIZE = 4096;
+const SPRITE_COLS = 3;
+const SPRITE_ROWS = 3;
+const SPRITE_CELL = SPRITE_IMG_SIZE / SPRITE_COLS; // 1365.33
+
+// 放大系数：>1 表示放大脸部（裁掉边缘）
+const SPRITE_ZOOM = 1.22;
+// 垂直偏移比例：正值=图像上移（裁掉更多脖子，露出头顶）
+const SPRITE_SHIFT_Y = 0.03;
+
+// 根据容器实际渲染尺寸精确定位 sprite
+function applySpriteStyle(spriteEl, type) {
+  const col = type % SPRITE_COLS;
+  const row = Math.floor(type / SPRITE_COLS);
+
+  // 读取容器（.tile-avatar）的实际渲染尺寸
+  const container = spriteEl.parentElement;
+  if (!container) return;
+  const containerW = container.clientWidth;
+  const containerH = container.clientHeight;
+  if (containerW === 0 || containerH === 0) return; // 还没渲染
+
+  // 保持 sprite 图等比例（正方形），以较大边为基准
+  const baseSize = Math.max(containerW, containerH);
+  const bgTotal = baseSize * SPRITE_COLS * SPRITE_ZOOM;
+
+  // 每格像素尺寸（正方形）
+  const cellSize = bgTotal / SPRITE_COLS;
+
+  // 让第 col,row 格的中心对准容器中心
+  let offsetX = (col + 0.5) * cellSize - containerW / 2;
+  let offsetY = (row + 0.5) * cellSize - containerH / 2;
+
+  // 垂直微调：略微上移，裁掉一点脖子，露出头顶
+  offsetY -= cellSize * SPRITE_SHIFT_Y;
+
+  spriteEl.style.backgroundSize = bgTotal + 'px ' + bgTotal + 'px';
+  spriteEl.style.backgroundPosition = (-offsetX) + 'px ' + (-offsetY) + 'px';
+}
+
+// 延迟定位：等 DOM 渲染后再读取实际尺寸
+function applySpriteStyleDeferred(spriteEl, type) {
+  spriteEl.dataset.spriteType = type;
+  requestAnimationFrame(() => {
+    applySpriteStyle(spriteEl, type);
+  });
+}
+
+// 刷新所有 tile 的 sprite 定位
+function refreshAllSprites() {
+  document.querySelectorAll('.emoji-sprite[data-sprite-type]').forEach(el => {
+    applySpriteStyle(el, parseInt(el.dataset.spriteType));
+  });
+}
+
+// 兼容旧调用（用于不需要精确像素的场景）
+function getSpritePos(type) {
+  const col = type % 3;
+  const row = Math.floor(type / 3);
+  return { x: col * 50, y: row * 50 };
+}
+
+// ============ Particle System ============
+const particles = [];
+const particleCanvas = document.getElementById('particle-canvas');
+const pCtx = particleCanvas.getContext('2d');
+let particleAnimId = null;
+
+// Soft pastel particle colors matching tile types
+const TYPE_COLORS = [
+  ['#f8a4c0', '#f06292', '#fce4ec'],  // Strawberry Pink
+  ['#ffd699', '#ffb74d', '#fff3e0'],  // Tangerine
+  ['#b2dfb4', '#81c784', '#e8f5e9'],  // Mint
+  ['#a3d5ff', '#64b5f6', '#e3f2fd'],  // Blueberry
+  ['#d7a0e0', '#ba68c8', '#f3e5f5'],  // Grape
+  ['#f8bbd0', '#f48fb1', '#fce4ec'],  // Bubblegum
+  ['#99e5ed', '#4dd0e1', '#e0f7fa'],  // Cotton Candy
+  ['#ffe88a', '#ffd54f', '#fffde7'],  // Lemon
+  ['#ffb89a', '#ff8a65', '#fbe9e7'],  // Peach
+];
+
+function spawnParticles(x, y, type, count) {
+  const colors = TYPE_COLORS[type] || ['#fff', '#ffd700', '#ffab91'];
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+    const speed = 2 + Math.random() * 4;
+    const size = 3 + Math.random() * 5;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1,
+      size,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 1,
+      decay: 0.015 + Math.random() * 0.02,
+      gravity: 0.08,
+      shape: Math.random() > 0.4 ? 'circle' : 'star',
+      rotation: Math.random() * Math.PI * 2,
+      rotSpeed: (Math.random() - 0.5) * 0.2,
+    });
+  }
+  if (!particleAnimId) animateParticles();
+}
+
+function drawStar(ctx, cx, cy, r, rot) {
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(rot);
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const a = (Math.PI * 2 * i) / 5 - Math.PI / 2;
+    const ra = (Math.PI * 2 * (i + 0.5)) / 5 - Math.PI / 2;
+    ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+    ctx.lineTo(Math.cos(ra) * r * 0.4, Math.sin(ra) * r * 0.4);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function animateParticles() {
+  pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += p.gravity;
+    p.life -= p.decay;
+    p.rotation += p.rotSpeed;
+
+    if (p.life <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+
+    pCtx.globalAlpha = p.life;
+    pCtx.fillStyle = p.color;
+
+    if (p.shape === 'star') {
+      drawStar(pCtx, p.x, p.y, p.size, p.rotation);
+    } else {
+      pCtx.beginPath();
+      pCtx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2);
+      pCtx.fill();
+    }
+  }
+
+  pCtx.globalAlpha = 1;
+
+  if (particles.length > 0) {
+    particleAnimId = requestAnimationFrame(animateParticles);
+  } else {
+    particleAnimId = null;
+  }
+}
+
+// ============ Game State ============
+let board = [];
+let tileElements = [];
+let selectedTile = null;
+let score = 0;
+let remaining = 0;
+let isAnimating = false;
+let timerInterval = null;
+let timeLeft = GAME_TIME;
+let comboCount = 0;
+let lastMatchTime = 0;
+const COMBO_WINDOW = 2500;
+
+const boardEl = document.getElementById('game-board');
+const canvas = document.getElementById('link-canvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const remainingEl = document.getElementById('remaining');
+const timerEl = document.getElementById('timer');
+const timerBar = document.getElementById('timer-bar');
+const comboEl = document.getElementById('combo');
+const overlay = document.getElementById('overlay');
+
+// Board size will be set dynamically per level
+function resizeBoardContainer() {
+  const boardW = INNER_COLS * CELL + GAP;
+  const boardH = INNER_ROWS * CELL + GAP;
+  boardEl.style.width = (boardW + 16) + 'px';
+  boardEl.style.height = (boardH + 16) + 'px';
+  canvas.width = boardW;
+  canvas.height = boardH;
+  particleCanvas.width = boardW;
+  particleCanvas.height = boardH;
+  // 计时器和分数面板宽度跟随棋盘
+  const panelW = Math.max(boardW + 16, 400);
+  document.querySelector('.timer-bar-container').style.width = panelW + 'px';
+  document.querySelector('.score-panel').style.width = panelW + 'px';
+}
+resizeBoardContainer();
+
+// ============ Board Initialization ============
+function createBoard() {
+  // Update board dimensions for current level
+  const levelConfig = LEVELS[currentLevel] || LEVELS[LEVELS.length - 1];
+  INNER_ROWS = levelConfig.rows;
+  INNER_COLS = levelConfig.cols;
+  ROWS = INNER_ROWS + 2;
+  COLS = INNER_COLS + 2;
+
+  // Resize board container and canvases
+  resizeBoardContainer();
+
+  board = [];
+  for (let r = 0; r < ROWS; r++) {
+    board[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      board[r][c] = -1;
+    }
+  }
+
+  // Get available types for current level
+  const availableTypes = levelConfig.types;
+  const numAvailableTypes = availableTypes.length;
+  const totalInner = INNER_ROWS * INNER_COLS;
+  const numPairs = totalInner / 2;
+
+  const types = [];
+  for (let i = 0; i < numPairs; i++) {
+    // Cycle through only the available types for this level
+    const t = availableTypes[i % numAvailableTypes];
+    types.push(t, t);
+  }
+
+  for (let i = types.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [types[i], types[j]] = [types[j], types[i]];
+  }
+
+  let idx = 0;
+  for (let r = 1; r <= INNER_ROWS; r++) {
+    for (let c = 1; c <= INNER_COLS; c++) {
+      board[r][c] = types[idx++];
+    }
+  }
+
+  remaining = totalInner;
+
+  // Update timer for this level
+  timeLeft = levelConfig.time;
+  timerEl.textContent = timeLeft;
+}
+
+// ============ Rendering ============
+function renderBoard() {
+  const tiles = boardEl.querySelectorAll('.tile');
+  tiles.forEach(t => t.remove());
+
+  tileElements = [];
+  for (let r = 0; r < ROWS; r++) {
+    tileElements[r] = [];
+    for (let c = 0; c < COLS; c++) {
+      tileElements[r][c] = null;
+    }
+  }
+
+  for (let r = 1; r <= INNER_ROWS; r++) {
+    for (let c = 1; c <= INNER_COLS; c++) {
+      if (board[r][c] >= 0) {
+        const tile = createTileElement(r, c, board[r][c]);
+        boardEl.appendChild(tile);
+        tileElements[r][c] = tile;
+      }
+    }
+  }
+}
+
+function createTileElement(row, col, type) {
+  const tile = document.createElement('div');
+  tile.className = 'tile';
+  tile.style.width = TILE_SIZE + 'px';
+  tile.style.height = TILE_SIZE + 'px';
+  tile.style.left = (8 + GAP + (col - 1) * CELL) + 'px';
+  tile.style.top = (8 + GAP + (row - 1) * CELL) + 'px';
+  tile.dataset.row = row;
+  tile.dataset.col = col;
+  tile.dataset.type = type;
+
+  // 头像区（上方 72%）
+  const avatar = document.createElement('div');
+  avatar.className = 'tile-avatar';
+
+  const sprite = document.createElement('div');
+  sprite.className = 'emoji-sprite';
+  avatar.appendChild(sprite);
+  tile.appendChild(avatar);
+  // 延迟到 DOM 渲染后再精确定位（读取实际容器尺寸）
+  applySpriteStyleDeferred(sprite, type);
+
+  // 标签区（下方 28%）
+  const label = document.createElement('div');
+  label.className = 'tile-label';
+  const wordSpan = document.createElement('span');
+  wordSpan.textContent = EMOJI_DATA[type]?.word ?? '';
+  label.appendChild(wordSpan);
+  tile.appendChild(label);
+
+  // 使用 pointerdown 替代 click，消除触控延迟，提升手感
+  tile.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    // 短振动反馈（移动端）
+    if (navigator.vibrate) navigator.vibrate(12);
+    onTileClick(+tile.dataset.row, +tile.dataset.col);
+  });
+  // 阻止右键菜单和拖拽
+  tile.addEventListener('contextmenu', (e) => e.preventDefault());
+  tile.addEventListener('dragstart', (e) => e.preventDefault());
+  return tile;
+}
+
+// ============ Coordinate Helpers ============
+function boardToPixel(row, col) {
+  // 计算原始像素位置（含 tile 定位的 8px padding offset）
+  let x = GAP + (col - 1) * CELL + TILE_SIZE / 2;
+  let y = GAP + (row - 1) * CELL + TILE_SIZE / 2;
+  // 将边界外的坐标 clamp 到棋盘边缘（让连线在边缘可见）
+  const boardW = INNER_COLS * CELL + GAP;
+  const boardH = INNER_ROWS * CELL + GAP;
+  x = Math.max(-8, Math.min(boardW + 8, x));
+  y = Math.max(-8, Math.min(boardH + 8, y));
+  return { x, y };
+}
+
+// ============ Link Path Finding ============
+// 完全开放四边连接：棋盘外部视为无限可通行空间
+function isEmpty(r, c) {
+  // 棋盘外部区域全部视为可通行（实现真正的无边界连接）
+  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return true;
+  return board[r][c] === -1;
+}
+
+function findLinkPath(r1, c1, r2, c2) {
+  if (r1 === r2 && c1 === c2) return null;
+  if (board[r1][c1] !== board[r2][c2]) return null;
+  if (board[r1][c1] < 0) return null;
+
+  // 直线连接
+  const straight = tryDirectLine(r1, c1, r2, c2);
+  if (straight) return straight;
+
+  // 一折连接（含边界外拐点）
+  const oneTurn = tryOneTurn(r1, c1, r2, c2);
+  if (oneTurn) return oneTurn;
+
+  // 两折连接（含边界外扫描线）
+  const twoTurn = tryTwoTurns(r1, c1, r2, c2);
+  if (twoTurn) return twoTurn;
+
+  return null;
+}
+
+// 检查两点之间直线是否全部可通行（支持边界外坐标）
+function canStraightLine(r1, c1, r2, c2) {
+  if (r1 === r2) {
+    const minC = Math.min(c1, c2), maxC = Math.max(c1, c2);
+    for (let c = minC + 1; c < maxC; c++) {
+      if (!isEmpty(r1, c)) return false;
+    }
+    return true;
+  }
+  if (c1 === c2) {
+    const minR = Math.min(r1, r2), maxR = Math.max(r1, r2);
+    for (let r = minR + 1; r < maxR; r++) {
+      if (!isEmpty(r, c1)) return false;
+    }
+    return true;
+  }
+  return false;
+}
+
+function tryDirectLine(r1, c1, r2, c2) {
+  if (canStraightLine(r1, c1, r2, c2)) {
+    return [{r: r1, c: c1}, {r: r2, c: c2}];
+  }
+  return null;
+}
+
+// 一折连接：除了棋盘内拐点，还尝试通过边界外的拐点
+function tryOneTurn(r1, c1, r2, c2) {
+  // 标准内部拐点
+  if (isEmpty(r1, c2) && canStraightLine(r1, c1, r1, c2) && canStraightLine(r1, c2, r2, c2)) {
+    return [{r: r1, c: c1}, {r: r1, c: c2}, {r: r2, c: c2}];
+  }
+  if (isEmpty(r2, c1) && canStraightLine(r1, c1, r2, c1) && canStraightLine(r2, c1, r2, c2)) {
+    return [{r: r1, c: c1}, {r: r2, c: c1}, {r: r2, c: c2}];
+  }
+  return null;
+}
+
+// 两折连接：扫描范围扩展到棋盘外2格，确保四边完全开放
+function tryTwoTurns(r1, c1, r2, c2) {
+  // 水平扫描线（包含棋盘外部）
+  for (let c = -1; c <= COLS; c++) {
+    if (c === c1 || c === c2) continue;
+    if (!isEmpty(r1, c) || !isEmpty(r2, c)) continue;
+    if (canStraightLine(r1, c1, r1, c) && canStraightLine(r1, c, r2, c) && canStraightLine(r2, c, r2, c2)) {
+      return [{r: r1, c: c1}, {r: r1, c: c}, {r: r2, c: c}, {r: r2, c: c2}];
+    }
+  }
+  // 垂直扫描线（包含棋盘外部）
+  for (let r = -1; r <= ROWS; r++) {
+    if (r === r1 || r === r2) continue;
+    if (!isEmpty(r, c1) || !isEmpty(r, c2)) continue;
+    if (canStraightLine(r1, c1, r, c1) && canStraightLine(r, c1, r, c2) && canStraightLine(r, c2, r2, c2)) {
+      return [{r: r1, c: c1}, {r: r, c: c1}, {r: r, c: c2}, {r: r2, c: c2}];
+    }
+  }
+  return null;
+}
+
+// ============ Drawing Link Lines ============
+let linkAnimId = null;
+
+function drawLinkPath(path, color) {
+  if (linkAnimId) cancelAnimationFrame(linkAnimId);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!path || path.length < 2) return;
+
+  const points = path.map(p => boardToPixel(p.r, p.c));
+const lineColor = color || '#ff69b4';
+
+  let totalLen = 0;
+  for (let i = 1; i < points.length; i++) {
+    const dx = points[i].x - points[i-1].x;
+    const dy = points[i].y - points[i-1].y;
+    totalLen += Math.sqrt(dx*dx + dy*dy);
+  }
+
+  const duration = 180;
+  const startTime = performance.now();
+
+  function animateLine(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const drawLen = totalLen * progress;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Layer 1: Wide outer glow (candy neon feel)
+    ctx.save();
+    ctx.shadowColor = lineColor;
+    ctx.shadowBlur = 18;
+    ctx.beginPath();
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 18;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = 0.18;
+    drawPartialPath(ctx, points, drawLen);
+    ctx.stroke();
+    ctx.restore();
+
+    // Layer 2: Bright color glow
+    ctx.beginPath();
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = 0.45;
+    drawPartialPath(ctx, points, drawLen);
+    ctx.stroke();
+
+    // Layer 3: White core (makes it pop)
+    ctx.beginPath();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = 0.9;
+    drawPartialPath(ctx, points, drawLen);
+    ctx.stroke();
+
+    // Layer 4: Thin bright color center
+    ctx.beginPath();
+    ctx.strokeStyle = lineColor;
+    ctx.lineWidth = 3;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = 1;
+    drawPartialPath(ctx, points, drawLen);
+    ctx.stroke();
+
+    // Draw glowing dots at turning points
+    ctx.globalAlpha = 1;
+    const drawnPoints = getDrawnPoints(points, drawLen);
+    for (let i = 1; i < drawnPoints.length - 1; i++) {
+      const p = drawnPoints[i];
+      // Outer glow dot
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+      ctx.fillStyle = lineColor;
+      ctx.globalAlpha = 0.35;
+      ctx.fill();
+      // Inner bright dot
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = 0.9;
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+
+    if (progress < 1) {
+      linkAnimId = requestAnimationFrame(animateLine);
+    } else {
+      setTimeout(() => fadeLinkLine(points, lineColor), 200);
+    }
+  }
+
+  linkAnimId = requestAnimationFrame(animateLine);
+}
+
+function drawPartialPath(ctx, points, maxLen) {
+  let drawn = 0;
+  ctx.moveTo(points[0].x, points[0].y);
+  for (let i = 1; i < points.length; i++) {
+    const dx = points[i].x - points[i-1].x;
+    const dy = points[i].y - points[i-1].y;
+    const segLen = Math.sqrt(dx*dx + dy*dy);
+    if (drawn + segLen <= maxLen) {
+      ctx.lineTo(points[i].x, points[i].y);
+      drawn += segLen;
+    } else {
+      const remain = maxLen - drawn;
+      const ratio = remain / segLen;
+      ctx.lineTo(points[i-1].x + dx * ratio, points[i-1].y + dy * ratio);
+      break;
+    }
+  }
+}
+
+// Helper: get the actual drawn corner points up to maxLen
+function getDrawnPoints(points, maxLen) {
+  const result = [points[0]];
+  let drawn = 0;
+  for (let i = 1; i < points.length; i++) {
+    const dx = points[i].x - points[i-1].x;
+    const dy = points[i].y - points[i-1].y;
+    const segLen = Math.sqrt(dx*dx + dy*dy);
+    if (drawn + segLen <= maxLen) {
+      result.push(points[i]);
+      drawn += segLen;
+    } else {
+      const remain = maxLen - drawn;
+      const ratio = remain / segLen;
+      result.push({ x: points[i-1].x + dx * ratio, y: points[i-1].y + dy * ratio });
+      break;
+    }
+  }
+  return result;
+}
+
+function fadeLinkLine(points, color) {
+  let opacity = 1;
+  function fade() {
+    opacity -= 0.1;
+    if (opacity <= 0) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      return;
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Fading outer glow
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = opacity * 0.35;
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.stroke();
+
+    // Fading white core
+    ctx.beginPath();
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.globalAlpha = opacity * 0.8;
+    ctx.moveTo(points[0].x, points[0].y);
+    for (let i = 1; i < points.length; i++) ctx.lineTo(points[i].x, points[i].y);
+    ctx.stroke();
+
+    // Fading corner dots
+    for (let i = 1; i < points.length - 1; i++) {
+      ctx.beginPath();
+      ctx.arc(points[i].x, points[i].y, 6, 0, Math.PI * 2);
+      ctx.fillStyle = color;
+      ctx.globalAlpha = opacity * 0.3;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(points[i].x, points[i].y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = '#fff';
+      ctx.globalAlpha = opacity * 0.7;
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(fade);
+  }
+  requestAnimationFrame(fade);
+}
+
+// ============ Match Toast Feedback System ============
+const matchToastContainer = document.getElementById('match-toast-container');
+let matchedWordsThisLevel = new Set(); // Track first-time matches per level
+let toastTimer = null;
+
+function showMatchToast(type) {
+  if (type < 0 || type >= EMOJI_DATA.length) return;
+
+  // Clear any existing toast
+  if (toastTimer) clearTimeout(toastTimer);
+
+  const isFirstMatch = !matchedWordsThisLevel.has(type);
+  matchedWordsThisLevel.add(type);
+
+  // Remove old toast
+  matchToastContainer.innerHTML = '';
+
+  // Build toast element
+  const toast = document.createElement('div');
+  toast.className = 'match-toast';
+
+  // Emoji sprite
+  const emojiWrap = document.createElement('div');
+  emojiWrap.className = 'toast-emoji';
+  const colors = TYPE_COLORS[type];
+  if (colors) {
+    emojiWrap.style.background = `linear-gradient(145deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
+  }
+  const sprite = document.createElement('div');
+  sprite.className = 'emoji-sprite';
+  // toast 中使用动态表情图，增强匹配成功的视觉反馈
+  sprite.style.backgroundImage = "url('1776060717188131.png')";
+  const pos = getSpritePos(type);
+  sprite.style.backgroundSize = '300% 300%';
+  sprite.style.backgroundPosition = `${pos.x}% ${pos.y}%`;
+  emojiWrap.appendChild(sprite);
+  toast.appendChild(emojiWrap);
+
+  // Word text
+  const wordEl = document.createElement('span');
+  wordEl.className = 'toast-word';
+  wordEl.textContent = EMOJI_DATA[type].word + '!';
+  toast.appendChild(wordEl);
+
+  // Show Chinese meaning only on first match of this word in current level
+  if (isFirstMatch) {
+    const meaningEl = document.createElement('span');
+    meaningEl.className = 'toast-meaning';
+    meaningEl.textContent = EMOJI_DATA[type].zh;
+    toast.appendChild(meaningEl);
+  }
+
+  matchToastContainer.appendChild(toast);
+
+  // Trigger show animation
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // 语音已在匹配确认时立即播放，此处不再重复调用
+
+  // Auto fade out
+  const stayDuration = isFirstMatch ? 1000 : 650;
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('fade-out');
+    setTimeout(() => {
+      if (toast.parentNode) toast.remove();
+    }, 300);
+    toastTimer = null;
+  }, stayDuration);
+}
+
+// ============ Interaction ============
+function onTileClick(row, col) {
+  if (isAnimating) return;
+  const type = board[row][col];
+  if (type < 0) return;
+
+  if (selectedTile === null) {
+    // First tile: directly select (no card popup)
+    selectedTile = { row, col };
+    if (tileElements[row][col]) tileElements[row][col].classList.add('selected');
+    playSelectSfx();  // 选中音效
+    speakWord(type);  // 选中时朗读单词
+  } else {
+    const prev = selectedTile;
+
+    if (prev.row === row && prev.col === col) {
+      // Clicking same tile: deselect
+      tileElements[row][col].classList.remove('selected');
+      selectedTile = null;
+      return;
+    }
+
+    const prevType = board[prev.row][prev.col];
+    if (prevType === type) {
+      const path = findLinkPath(prev.row, prev.col, row, col);
+      if (path) {
+        // Match success! Remove selection, animate, then show toast
+        if (tileElements[prev.row][prev.col]) tileElements[prev.row][prev.col].classList.remove('selected');
+        selectedTile = null;
+        isAnimating = true;
+
+        const colors = TYPE_COLORS[type];
+const lineColor = colors ? colors[1] : '#ff69b4';
+        drawLinkPath(path, lineColor);
+
+        // 立即播放语音，不等连线动画结束（消除延迟感）
+        speakWord(type);
+
+        setTimeout(() => {
+          removeTilePair(prev.row, prev.col, row, col, type);
+          isAnimating = false;
+
+          // 显示轻量 toast 反馈（非阻断）
+          showMatchToast(type);
+
+          // Check game state immediately
+          if (remaining <= 0) {
+            gameWin();
+          } else if (!hasValidMoves()) {
+            showNoMovesOverlay();
+          }
+        }, 320);
+        return;
+      }
+    }
+
+    // No match - 旧牌轻微抖动+边框闪红，新牌立即选中，不打断操作流
+    const prevTile = tileElements[prev.row]?.[prev.col];
+    if (prevTile) {
+      prevTile.classList.remove('selected');
+      prevTile.classList.remove('tile-wiggle');
+      void prevTile.offsetWidth; // 强制 reflow 让动画重新触发
+      prevTile.classList.add('tile-wiggle');
+      setTimeout(() => prevTile.classList.remove('tile-wiggle'), 380);
+    }
+    playErrorSfx();  // 不匹配提示音
+    if (navigator.vibrate) navigator.vibrate([15, 30, 15]); // 双振提示
+
+    // 新牌立即选中（干净响应，无动画冲突）
+    selectedTile = { row, col };
+    if (tileElements[row][col]) tileElements[row][col].classList.add('selected');
+    playSelectSfx();  // 选中音效
+    speakWord(type);  // 切换选中时也朗读新单词
+  }
+}
+
+function removeTilePair(r1, c1, r2, c2, type) {
+  const p1 = boardToPixel(r1, c1);
+  const p2 = boardToPixel(r2, c2);
+  spawnParticles(p1.x, p1.y, type, 18);
+  spawnParticles(p2.x, p2.y, type, 18);
+
+  if (tileElements[r1][c1]) tileElements[r1][c1].classList.add('matched');
+  if (tileElements[r2][c2]) tileElements[r2][c2].classList.add('matched');
+
+  setTimeout(() => {
+    if (tileElements[r1][c1]) { tileElements[r1][c1].remove(); tileElements[r1][c1] = null; }
+    if (tileElements[r2][c2]) { tileElements[r2][c2].remove(); tileElements[r2][c2] = null; }
+  }, 350);
+
+  board[r1][c1] = -1;
+  board[r2][c2] = -1;
+  remaining -= 2;
+  remainingEl.textContent = remaining;
+
+  const now = Date.now();
+  if (now - lastMatchTime < COMBO_WINDOW) {
+    comboCount++;
+  } else {
+    comboCount = 1;
+  }
+  lastMatchTime = now;
+  comboEl.textContent = comboCount;
+
+  const baseScore = 100;
+  const comboMultiplier = Math.min(comboCount, 5);
+  const gained = baseScore * comboMultiplier;
+  score += gained;
+  scoreEl.textContent = score;
+
+  showFloatScore(r1, c1, r2, c2, gained);
+
+  if (comboCount >= 2) {
+    showComboText(comboCount);
+  }
+}
+
+// ============ Valid Moves Check ============
+function hasValidMoves() {
+  const tiles = [];
+  for (let r = 1; r <= INNER_ROWS; r++) {
+    for (let c = 1; c <= INNER_COLS; c++) {
+      if (board[r][c] >= 0) tiles.push({ r, c, type: board[r][c] });
+    }
+  }
+
+  const groups = {};
+  for (const t of tiles) {
+    if (!groups[t.type]) groups[t.type] = [];
+    groups[t.type].push(t);
+  }
+
+  for (const type in groups) {
+    const g = groups[type];
+    for (let i = 0; i < g.length; i++) {
+      for (let j = i + 1; j < g.length; j++) {
+        if (findLinkPath(g[i].r, g[i].c, g[j].r, g[j].c)) return true;
+      }
+    }
+  }
+  return false;
+}
+
+// ============ Hint System ============
+function findHint() {
+  const tiles = [];
+  for (let r = 1; r <= INNER_ROWS; r++) {
+    for (let c = 1; c <= INNER_COLS; c++) {
+      if (board[r][c] >= 0) tiles.push({ r, c, type: board[r][c] });
+    }
+  }
+
+  const groups = {};
+  for (const t of tiles) {
+    if (!groups[t.type]) groups[t.type] = [];
+    groups[t.type].push(t);
+  }
+
+  for (const type in groups) {
+    const g = groups[type];
+    for (let i = 0; i < g.length; i++) {
+      for (let j = i + 1; j < g.length; j++) {
+        if (findLinkPath(g[i].r, g[i].c, g[j].r, g[j].c)) return [g[i], g[j]];
+      }
+    }
+  }
+  return null;
+}
+
+function showHint() {
+  if (isAnimating) return;
+  document.querySelectorAll('.tile.hint').forEach(t => t.classList.remove('hint'));
+
+  const hint = findHint();
+  if (hint) {
+    for (const h of hint) {
+      if (tileElements[h.r][h.c]) tileElements[h.r][h.c].classList.add('hint');
+    }
+    const path = findLinkPath(hint[0].r, hint[0].c, hint[1].r, hint[1].c);
+    if (path) {
+      const colors = TYPE_COLORS[hint[0].type];
+drawLinkPath(path, colors ? colors[1] : '#ff69b4');
+    }
+    setTimeout(() => {
+      document.querySelectorAll('.tile.hint').forEach(t => t.classList.remove('hint'));
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }, LEVELS[currentLevel]?.hintCooldown ?? 2500);
+  }
+}
+
+// ============ Shuffle ============
+function shuffleBoard(force) {
+  // Block manual shuffle during animation, but allow forced auto-shuffle
+  if (!force && isAnimating) return;
+  isAnimating = true;
+
+  // Clear selection and hint highlights
+  if (selectedTile) {
+    if (tileElements[selectedTile.row]?.[selectedTile.col]) {
+      tileElements[selectedTile.row][selectedTile.col].classList.remove('selected');
+    }
+    selectedTile = null;
+  }
+  document.querySelectorAll('.tile.hint').forEach(t => t.classList.remove('hint'));
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const types = [];
+  for (let r = 1; r <= INNER_ROWS; r++) {
+    for (let c = 1; c <= INNER_COLS; c++) {
+      if (board[r][c] >= 0) types.push(board[r][c]);
+    }
+  }
+
+  for (let i = types.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [types[i], types[j]] = [types[j], types[i]];
+  }
+
+  let idx = 0;
+  for (let r = 1; r <= INNER_ROWS; r++) {
+    for (let c = 1; c <= INNER_COLS; c++) {
+      if (board[r][c] >= 0) {
+        board[r][c] = types[idx++];
+        const tile = tileElements[r][c];
+        if (tile) {
+          tile.dataset.type = board[r][c];
+          const sprite = tile.querySelector('.emoji-sprite');
+          if (sprite) {
+            sprite.dataset.spriteType = board[r][c];
+            applySpriteStyle(sprite, board[r][c]);
+          }
+          // 同步更新标签文字
+          const labelSpan = tile.querySelector('.tile-label span');
+          if (labelSpan) labelSpan.textContent = EMOJI_DATA[board[r][c]]?.word ?? '';
+        }
+      }
+    }
+  }
+
+  setTimeout(() => {
+    isAnimating = false;
+    if (remaining > 0 && !hasValidMoves()) shuffleBoard(true);
+  }, 300);
+}
+
+// ============ Timer ============
+function startTimer() {
+  stopTimer();
+  const levelTime = LEVELS[currentLevel] ? LEVELS[currentLevel].time : GAME_TIME;
+  timeLeft = levelTime;
+  timerEl.textContent = timeLeft;
+  timerBar.style.width = '100%';
+  timerBar.classList.remove('danger');
+
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = Math.max(0, timeLeft);
+    timerBar.style.width = (timeLeft / levelTime * 100) + '%';
+
+    if (timeLeft <= 15) {
+      timerBar.classList.add('danger');
+    }
+
+    if (timeLeft <= 0) {
+      stopTimer();
+      gameOver();
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+// resumeTimer removed - no longer needed since toast feedback is non-blocking
+
+// ============ UI Effects ============
+function showFloatScore(r1, c1, r2, c2, gained) {
+  const p1 = boardToPixel(r1, c1);
+  const p2 = boardToPixel(r2, c2);
+  const cx = (p1.x + p2.x) / 2 + 6;
+  const cy = (p1.y + p2.y) / 2 + 6;
+
+  const el = document.createElement('div');
+  el.className = 'float-score';
+  el.textContent = '+' + gained;
+  el.style.left = cx + 'px';
+  el.style.top = cy + 'px';
+  boardEl.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function showComboText(combo) {
+  const existing = boardEl.querySelector('.combo-text');
+  if (existing) existing.remove();
+
+  const labels = ['', '', 'Sweet! ×2', 'Yummy! ×3', 'Delicious! ×4', 'Sugar Rush! ×5'];
+  const text = labels[Math.min(combo, 5)] || `Amazing! ×${Math.min(combo, 5)}`;
+
+  const el = document.createElement('div');
+  el.className = 'combo-text';
+  el.textContent = text;
+  boardEl.appendChild(el);
+  setTimeout(() => el.remove(), 1000);
+}
+
+function gameWin() {
+  stopTimer();
+  selectedTile = null;
+  isAnimating = false;
+  const timeBonus = timeLeft * 10;
+  score += timeBonus;
+  scoreEl.textContent = score;
+
+  const winBoardW = INNER_COLS * CELL + GAP;
+  const winBoardH = INNER_ROWS * CELL + GAP;
+  for (let i = 0; i < 8; i++) {
+    setTimeout(() => {
+      const x = Math.random() * winBoardW;
+      const y = Math.random() * winBoardH;
+      spawnParticles(x, y, Math.floor(Math.random() * NUM_TYPES), 25);
+    }, i * 100);
+  }
+
+  const isLastLevel = currentLevel >= LEVELS.length - 1;
+  const overlayBtn = document.getElementById('overlay-btn');
+
+  setTimeout(() => {
+    if (isLastLevel) {
+      // All levels complete!
+      document.getElementById('overlay-title').textContent = '🎉🍬 全部通关！';
+      document.getElementById('overlay-text').innerHTML =
+        `恭喜你完成了所有关卡！<br>最终得分：<b style="color:#e91e63;font-size:1.5rem">${score}</b><br><span style="font-size:0.9rem;opacity:0.7">（时间奖励 +${timeBonus}）</span>`;
+      overlayBtn.textContent = '🍭 再来一局';
+      overlayBtn.onclick = () => { currentLevel = 0; restartGame(); };
+    } else {
+      // Level complete, go to next
+      const nextLevel = LEVELS[currentLevel + 1];
+      document.getElementById('overlay-title').textContent = `${LEVELS[currentLevel].emoji} 第${currentLevel + 1}关通过！`;
+      document.getElementById('overlay-text').innerHTML =
+        `得分：<b style="color:#e91e63;font-size:1.3rem">${score}</b>` +
+        `<br><span style="font-size:0.9rem;opacity:0.7">（时间奖励 +${timeBonus}）</span>` +
+        `<br><br><span style="font-size:1rem;color:#ad1457">下一关：${nextLevel.emoji} ${nextLevel.label}</span>` +
+        `<br><span style="font-size:0.88rem;color:#6d4c41;font-weight:700">${nextLevel.desc}</span>`;
+      overlayBtn.textContent = '🍬 下一关';
+      overlayBtn.onclick = nextLevel_go;
+    }
+    overlay.classList.add('show');
+  }, 800);
+}
+
+function nextLevel_go() {
+  currentLevel++;
+  overlay.classList.remove('show');
+  // Clear toast feedback
+  matchToastContainer.innerHTML = '';
+  if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+  matchedWordsThisLevel = new Set();
+  // Keep score across levels!
+  remaining = 0;
+  selectedTile = null;
+  isAnimating = false;
+  comboCount = 0;
+  lastMatchTime = 0;
+  timerBar.classList.remove('danger');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+  particles.length = 0;
+
+  updateLevelDisplay();
+  preloadLevelAudio(LEVELS[currentLevel].types);
+  createBoard();
+  remainingEl.textContent = remaining;
+  renderBoard();
+
+  if (!hasValidMoves()) shuffleBoard(true);
+  startTimer();
+}
+
+function gameOver() {
+  stopTimer();
+  // Clear selection state
+  if (selectedTile) {
+    if (tileElements[selectedTile.row]?.[selectedTile.col]) {
+      tileElements[selectedTile.row][selectedTile.col].classList.remove('selected');
+    }
+    selectedTile = null;
+  }
+  isAnimating = false;
+
+  document.getElementById('overlay-title').textContent = '⏰ 时间到！';
+  document.getElementById('overlay-text').innerHTML =
+    `第${currentLevel + 1}关 · 最终得分：<b style="color:#e91e63;font-size:1.5rem">${score}</b>`;
+  const overlayBtn = document.getElementById('overlay-btn');
+  overlayBtn.textContent = '🍭 重新开始';
+  overlayBtn.onclick = restartGame;
+  overlay.classList.add('show');
+}
+
+function showNoMovesOverlay() {
+  shuffleBoard(true);
+}
+
+// ============ Game Control ============
+function updateLevelDisplay() {
+  const levelEl = document.getElementById('level');
+  const lvl = LEVELS[currentLevel];
+  levelEl.textContent = `${lvl.emoji} ${currentLevel + 1} / ${LEVELS.length}`;
+}
+
+function restartGame() {
+  overlay.classList.remove('show');
+  // Clear toast feedback
+  matchToastContainer.innerHTML = '';
+  if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+  matchedWordsThisLevel = new Set();
+  currentLevel = 0;
+  score = 0;
+  remaining = 0;
+  selectedTile = null;
+  isAnimating = false;
+  comboCount = 0;
+  lastMatchTime = 0;
+  scoreEl.textContent = 0;
+  comboEl.textContent = 0;
+  timerBar.classList.remove('danger');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pCtx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+  particles.length = 0;
+
+  // Reset overlay button
+  const overlayBtn = document.getElementById('overlay-btn');
+  overlayBtn.textContent = '🍭 再来一局';
+  overlayBtn.onclick = restartGame;
+
+  updateLevelDisplay();
+  preloadLevelAudio(LEVELS[currentLevel].types);
+  createBoard();
+  remainingEl.textContent = remaining;
+  renderBoard();
+
+  if (!hasValidMoves()) shuffleBoard(true);
+
+  startTimer();
+}
+
+// ============ Event Listeners ============
+document.getElementById('btn-restart').addEventListener('click', restartGame);
+document.getElementById('btn-hint').addEventListener('click', showHint);
+document.getElementById('btn-shuffle').addEventListener('click', shuffleBoard);
+
+// 棋盘级事件委托：点击间隙也能命中最近的卡片
+boardEl.addEventListener('pointerdown', (e) => {
+  // 如果直接点中了 tile，已由 tile 自己的 pointerdown 处理，跳过
+  if (e.target.closest('.tile')) return;
+
+  // 点击在间隙或空白区域，计算最近的 tile
+  const rect = boardEl.getBoundingClientRect();
+  const px = e.clientX - rect.left - 8; // 减去 padding
+  const py = e.clientY - rect.top - 8;
+
+  // 反算行列（包含间隙容差）
+  const col = Math.round((px - TILE_SIZE / 2) / CELL) + 1;
+  const row = Math.round((py - TILE_SIZE / 2) / CELL) + 1;
+
+  // 边界检查
+  if (row < 1 || row > INNER_ROWS || col < 1 || col > INNER_COLS) return;
+  if (!tileElements[row] || !tileElements[row][col]) return;
+  if (board[row][col] < 0) return;
+
+  e.preventDefault();
+  if (navigator.vibrate) navigator.vibrate(12);
+  onTileClick(row, col);
+});
+boardEl.addEventListener('contextmenu', (e) => e.preventDefault());
+
+// ============ Start Game ============
+restartGame();
+</script>
+
+</body>
+</html>
