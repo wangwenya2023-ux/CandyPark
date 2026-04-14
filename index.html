@@ -143,14 +143,15 @@
     font-size: 1rem; margin-left: 3px;
     text-shadow: 0 1px 4px rgba(233,30,99,0.2);
   }
-  /* Game Board - 糖果实色背景 */
+  /* Game Board - 水晶果冻棋盘 */
   #game-board {
     position: relative; border-radius: 16px;
-    background: #fdeef4;
+    background: linear-gradient(135deg, #fdeef4 0%, #fce4ec 50%, #fdeef4 100%);
     overflow: visible; z-index: 20; padding: 8px;
     touch-action: manipulation; -webkit-tap-highlight-color: transparent;
     -webkit-user-select: none; user-select: none; cursor: pointer;
     max-width: 100vw; box-sizing: border-box;
+    box-shadow: inset 0 2px 8px rgba(255,255,255,0.6), inset 0 -2px 8px rgba(200,150,170,0.12), 0 4px 20px rgba(0,0,0,0.06);
   }
   .board-frame { position: relative; display: inline-block; padding: 0; background: none; }
   /* Tiles - Soft candy pastels */
@@ -164,71 +165,78 @@
     -webkit-user-select: none; user-select: none; -webkit-touch-callout: none;
   }
   .tile[data-type="0"] {
-    /* Strawberry Pink */
+    /* Strawberry Pink - 水晶果冻 */
     border-color: #f06292;
-    background: linear-gradient(145deg, #f8a4c0 0%, #f06292 50%, #e04878 100%);
-    box-shadow: 0 3px 8px rgba(240,98,146,0.35);
+    background: linear-gradient(145deg, #fbb8d0 0%, #f48bab 30%, #f06292 55%, #e04878 85%, #d63e6c 100%);
+    box-shadow: 0 4px 10px rgba(240,98,146,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(180,30,80,0.2);
   }
   .tile[data-type="1"] {
-    /* Tangerine Orange */
+    /* Tangerine Orange - 水晶果冻 */
     border-color: #ffb74d;
-    background: linear-gradient(145deg, #ffd699 0%, #ffb74d 50%, #ffa726 100%);
-    box-shadow: 0 3px 8px rgba(255,183,77,0.35);
+    background: linear-gradient(145deg, #ffe0a8 0%, #ffcc7a 30%, #ffb74d 55%, #ffa726 85%, #ff9800 100%);
+    box-shadow: 0 4px 10px rgba(255,183,77,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(200,120,0,0.2);
   }
   .tile[data-type="2"] {
-    /* Mint Candy */
+    /* Mint Candy - 水晶果冻 */
     border-color: #a8d8b0;
-    background: linear-gradient(145deg, #d4eedb 0%, #b8dfc0 50%, #9ecfaa 100%);
-    box-shadow: 0 3px 8px rgba(158,207,170,0.32);
+    background: linear-gradient(145deg, #ddf2e2 0%, #c4e6cc 30%, #b8dfc0 55%, #9ecfaa 85%, #88c496 100%);
+    box-shadow: 0 4px 10px rgba(158,207,170,0.38), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(80,150,100,0.18);
   }
   .tile[data-type="3"] {
-    /* Blueberry */
+    /* Blueberry - 水晶果冻 */
     border-color: #64b5f6;
-    background: linear-gradient(145deg, #a3d5ff 0%, #64b5f6 50%, #42a5f5 100%);
-    box-shadow: 0 3px 8px rgba(100,181,246,0.35);
+    background: linear-gradient(145deg, #b8deff 0%, #8ccbff 30%, #64b5f6 55%, #42a5f5 85%, #2196f3 100%);
+    box-shadow: 0 4px 10px rgba(100,181,246,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(30,100,200,0.2);
   }
   .tile[data-type="4"] {
-    /* Grape Purple */
+    /* Grape Purple - 水晶果冻 */
     border-color: #ba68c8;
-    background: linear-gradient(145deg, #d7a0e0 0%, #ba68c8 50%, #ab47bc 100%);
-    box-shadow: 0 3px 8px rgba(186,104,200,0.35);
+    background: linear-gradient(145deg, #dfb0e8 0%, #cca0d8 30%, #ba68c8 55%, #ab47bc 85%, #9c27b0 100%);
+    box-shadow: 0 4px 10px rgba(186,104,200,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(120,30,150,0.2);
   }
   .tile[data-type="5"] {
-    /* Bubblegum Rose */
+    /* Bubblegum Rose - 水晶果冻 */
     border-color: #f48fb1;
-    background: linear-gradient(145deg, #f8bbd0 0%, #f48fb1 50%, #ec407a 100%);
-    box-shadow: 0 3px 8px rgba(244,143,177,0.35);
+    background: linear-gradient(145deg, #fcc8da 0%, #f8aec6 30%, #f48fb1 55%, #ec407a 85%, #e91e63 100%);
+    box-shadow: 0 4px 10px rgba(244,143,177,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(180,30,80,0.18);
   }
   .tile[data-type="6"] {
-    /* Cotton Candy Cyan */
+    /* Cotton Candy Cyan - 水晶果冻 */
     border-color: #4dd0e1;
-    background: linear-gradient(145deg, #99e5ed 0%, #4dd0e1 50%, #26c6da 100%);
-    box-shadow: 0 3px 8px rgba(77,208,225,0.35);
+    background: linear-gradient(145deg, #a8e8f0 0%, #78dce8 30%, #4dd0e1 55%, #26c6da 85%, #00bcd4 100%);
+    box-shadow: 0 4px 10px rgba(77,208,225,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(0,120,150,0.2);
   }
   .tile[data-type="7"] {
-    /* Lemon Yellow */
+    /* Lemon Yellow - 水晶果冻 */
     border-color: #ffd54f;
-    background: linear-gradient(145deg, #ffe88a 0%, #ffd54f 50%, #ffca28 100%);
-    box-shadow: 0 3px 8px rgba(255,213,79,0.35);
+    background: linear-gradient(145deg, #ffeda0 0%, #ffe478 30%, #ffd54f 55%, #ffca28 85%, #ffc107 100%);
+    box-shadow: 0 4px 10px rgba(255,213,79,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(180,150,0,0.18);
   }
   .tile[data-type="8"] {
-    /* Peach Coral */
+    /* Peach Coral - 水晶果冻 */
     border-color: #ff8a65;
-    background: linear-gradient(145deg, #ffb89a 0%, #ff8a65 50%, #ff7043 100%);
-    box-shadow: 0 3px 8px rgba(255,138,101,0.35);
+    background: linear-gradient(145deg, #ffc4aa 0%, #ffa888 30%, #ff8a65 55%, #ff7043 85%, #ff5722 100%);
+    box-shadow: 0 4px 10px rgba(255,138,101,0.4), inset 0 2px 4px rgba(255,255,255,0.35), inset 0 -2px 6px rgba(180,50,10,0.2);
   }
   /* Neon shine effect */
-  /* Candy shine - 柔和的光泽效果 */
+  /* 水晶果冻 - 顶部高光（模拟玻璃反射） */
   .tile::before {
     content: '';
-    position: absolute; top: 3px; left: 10%; width: 80%; height: 18%;
-    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 60%, transparent 100%);
-    border-radius: 10px 10px 50% 50%; pointer-events: none; z-index: 20;
+    position: absolute; top: 3px; left: 8%; width: 84%; height: 22%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.25) 40%, rgba(255,255,255,0.05) 70%, transparent 100%);
+    border-radius: 12px 12px 50% 50%; pointer-events: none; z-index: 20;
+  }
+  /* 水晶果冻 - 底部反光弧（模拟果冻透光） */
+  .tile::after {
+    content: '';
+    position: absolute; bottom: 18%; left: 15%; width: 70%; height: 12%;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.18) 0%, transparent 70%);
+    border-radius: 50%; pointer-events: none; z-index: 20;
   }
   .tile:hover {
     transform: scale(1.11) translateY(-3px); z-index: 10;
-    filter: brightness(1.05) saturate(1.10);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
+    filter: brightness(1.08) saturate(1.12);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2), inset 0 2px 6px rgba(255,255,255,0.45), inset 0 -2px 6px rgba(0,0,0,0.08) !important;
   }
   .tile:hover .emoji-sprite { background-image: url('1776060717188131.png') !important; }
   .tile.selected {
@@ -261,14 +269,46 @@
         0 5px 16px rgba(0,0,0,0.10) !important;
     }
   }
-  .tile:active { transform: scale(0.88) !important; transition-duration: 0.04s !important; filter: brightness(0.85) !important; }
-  .tile.matched { animation: candyPop 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-  @keyframes candyPop {
+  .tile:active { transform: scale(0.90, 0.95) !important; transition-duration: 0.04s !important; filter: brightness(0.92) saturate(1.1) !important; }
+  .tile.matched {
+    animation: jellyPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes jellyPop {
     0%   { transform: scale(1.0); opacity: 1; filter: brightness(1); }
-    15%  { transform: scale(1.20) rotate(3deg); opacity: 1; filter: brightness(1.3) saturate(1.3); }
-    30%  { transform: scale(1.30) rotate(-2deg); opacity: 0.85; filter: brightness(1.2); }
-    55%  { transform: scale(1.20) rotate(1deg); opacity: 0.5; }
-    100% { transform: scale(0) rotate(8deg); opacity: 0; }
+    8%   { transform: scale(0.85, 1.15); opacity: 1; filter: brightness(1.1); }
+    16%  { transform: scale(1.20, 0.88); opacity: 1; filter: brightness(1.25) saturate(1.3); }
+    24%  { transform: scale(0.92, 1.12) rotate(2deg); opacity: 1; filter: brightness(1.35); }
+    35%  { transform: scale(1.30, 0.85) rotate(-3deg); opacity: 0.9; filter: brightness(1.4) saturate(1.4); }
+    50%  { transform: scale(1.15, 1.05) rotate(1deg); opacity: 0.7; filter: brightness(1.3); }
+    70%  { transform: scale(1.35) rotate(-2deg); opacity: 0.4; filter: brightness(1.5) saturate(1.5); }
+    100% { transform: scale(0) rotate(10deg); opacity: 0; filter: brightness(2); }
+  }
+  /* 碰撞时的光环爆炸效果 */
+  .tile.match-burst::before {
+    content: '' !important;
+    position: absolute !important; top: 50% !important; left: 50% !important;
+    width: 200% !important; height: 200% !important;
+    transform: translate(-50%, -50%) scale(0) !important;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.3) 30%, transparent 70%) !important;
+    border-radius: 50% !important; pointer-events: none !important; z-index: 100 !important;
+    animation: burstRing 0.45s ease-out forwards !important;
+  }
+  @keyframes burstRing {
+    0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    40%  { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+  }
+  /* 果冻摇晃效果 - 碰撞前的果冻弹性 */
+  .tile.jelly-wobble {
+    animation: jellyWobble 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes jellyWobble {
+    0%   { transform: scale(1, 1); }
+    20%  { transform: scale(0.88, 1.14); }
+    40%  { transform: scale(1.12, 0.90); }
+    60%  { transform: scale(0.95, 1.06); }
+    80%  { transform: scale(1.03, 0.97); }
+    100% { transform: scale(1, 1); }
   }
   /* Tile inner structure */
   .tile-avatar {
@@ -1119,6 +1159,47 @@ function spawnParticles(x, y, type, count) {
   if (!particleAnimId) animateParticles();
 }
 
+// 碰撞时的白色闪光粒子 - 模拟水晶碎裂光芒
+function spawnGlowParticles(x, y, count) {
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.3;
+    const speed = 1.5 + Math.random() * 3;
+    particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 0.5,
+      size: 4 + Math.random() * 6,
+      color: `rgba(255,255,255,${0.6 + Math.random() * 0.4})`,
+      life: 1,
+      decay: 0.03 + Math.random() * 0.02,
+      gravity: 0.03,
+      shape: 'circle',
+      rotation: 0,
+      rotSpeed: 0,
+      glow: true,
+    });
+  }
+  if (!particleAnimId) animateParticles();
+}
+
+// 周围方块果冻摇晃效果 - 碰撞冲击波
+function jellyWobbleNeighbors(r, c) {
+  const offsets = [[-1,0],[1,0],[0,-1],[0,1],[-1,-1],[-1,1],[1,-1],[1,1]];
+  offsets.forEach(([dr, dc], idx) => {
+    const nr = r + dr, nc = c + dc;
+    if (nr >= 1 && nr <= INNER_ROWS && nc >= 1 && nc <= INNER_COLS && board[nr][nc] >= 0) {
+      const neighbor = tileElements[nr]?.[nc];
+      if (neighbor && !neighbor.classList.contains('matched')) {
+        // 延迟递增，产生波纹扩散效果
+        setTimeout(() => {
+          neighbor.classList.add('jelly-wobble');
+          setTimeout(() => neighbor.classList.remove('jelly-wobble'), 380);
+        }, idx * 25);
+      }
+    }
+  });
+}
+
 function drawStar(ctx, cx, cy, r, rot) {
   ctx.save();
   ctx.translate(cx, cy);
@@ -1154,6 +1235,15 @@ function animateParticles() {
     pCtx.globalAlpha = p.life;
     pCtx.fillStyle = p.color;
 
+    // 发光粒子 - 添加模糊光晕
+    if (p.glow) {
+      pCtx.shadowColor = 'rgba(255,255,255,0.8)';
+      pCtx.shadowBlur = p.size * 2;
+    } else {
+      pCtx.shadowColor = 'transparent';
+      pCtx.shadowBlur = 0;
+    }
+
     if (p.shape === 'star') {
       drawStar(pCtx, p.x, p.y, p.size, p.rotation);
     } else {
@@ -1164,6 +1254,8 @@ function animateParticles() {
   }
 
   pCtx.globalAlpha = 1;
+  pCtx.shadowColor = 'transparent';
+  pCtx.shadowBlur = 0;
 
   if (particles.length > 0) {
     particleAnimId = requestAnimationFrame(animateParticles);
@@ -1825,16 +1917,31 @@ const lineColor = colors ? colors[1] : '#ff69b4';
 function removeTilePair(r1, c1, r2, c2, type) {
   const p1 = boardToPixel(r1, c1);
   const p2 = boardToPixel(r2, c2);
-  spawnParticles(p1.x, p1.y, type, 18);
-  spawnParticles(p2.x, p2.y, type, 18);
+  // 增强粒子爆炸 - 更多粒子 + 光晕粒子
+  spawnParticles(p1.x, p1.y, type, 24);
+  spawnParticles(p2.x, p2.y, type, 24);
+  // 额外的白色闪光粒子
+  spawnGlowParticles(p1.x, p1.y, 6);
+  spawnGlowParticles(p2.x, p2.y, 6);
 
-  if (tileElements[r1][c1]) tileElements[r1][c1].classList.add('matched');
-  if (tileElements[r2][c2]) tileElements[r2][c2].classList.add('matched');
+  // 添加光环爆炸 + 果冻消除动画
+  if (tileElements[r1][c1]) {
+    tileElements[r1][c1].classList.add('match-burst');
+    tileElements[r1][c1].classList.add('matched');
+  }
+  if (tileElements[r2][c2]) {
+    tileElements[r2][c2].classList.add('match-burst');
+    tileElements[r2][c2].classList.add('matched');
+  }
+
+  // 周围方块果冻摇晃效果
+  jellyWobbleNeighbors(r1, c1);
+  jellyWobbleNeighbors(r2, c2);
 
   setTimeout(() => {
     if (tileElements[r1][c1]) { tileElements[r1][c1].remove(); tileElements[r1][c1] = null; }
     if (tileElements[r2][c2]) { tileElements[r2][c2].remove(); tileElements[r2][c2] = null; }
-  }, 350);
+  }, 480);
 
   board[r1][c1] = -1;
   board[r2][c2] = -1;
@@ -2303,9 +2410,13 @@ function activateBomb() {
   const p2 = boardToPixel(h2.r, h2.c);
   spawnParticles(p1.x, p1.y, type, 35);
   spawnParticles(p2.x, p2.y, type, 35);
+  spawnGlowParticles(p1.x, p1.y, 10);
+  spawnGlowParticles(p2.x, p2.y, 10);
 
-  if (t1) t1.classList.add('matched');
-  if (t2) t2.classList.add('matched');
+  if (t1) { t1.classList.add('match-burst'); t1.classList.add('matched'); }
+  if (t2) { t2.classList.add('match-burst'); t2.classList.add('matched'); }
+  jellyWobbleNeighbors(h1.r, h1.c);
+  jellyWobbleNeighbors(h2.r, h2.c);
 
   setTimeout(() => {
     if (t1) { t1.remove(); tileElements[h1.r][h1.c] = null; }
@@ -2320,7 +2431,7 @@ function activateBomb() {
 
     if (remaining <= 0) gameWin();
     else if (!hasValidMoves()) showNoMovesOverlay();
-  }, 400);
+  }, 500);
 }
 
 // ============ Screen Shake ============
