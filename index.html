@@ -2185,7 +2185,6 @@ function onTileClick(row, col) {
     // First tile: directly select (no card popup)
     selectedTile = { row, col };
     if (tileElements[row][col]) tileElements[row][col].classList.add('selected');
-    playSelectSfx();  // 选中音效
     speakWord(type);  // 选中时朗读单词
   } else {
     const prev = selectedTile;
@@ -2222,8 +2221,7 @@ function onTileClick(row, col) {
 const lineColor = colors ? colors[1] : '#ff69b4';
         drawLinkPath(path, lineColor);
 
-        // 匹配成功！播放情感音效前奏 + 欢呼版语音
-        playEmotionSfx(type);
+        // 匹配成功！播放欢呼版语音（已包含情感表达）
         speakWordMatch(type);
 
         // 弹出后短暂停留，再切换到欢庆消失动画
@@ -2276,7 +2274,6 @@ const lineColor = colors ? colors[1] : '#ff69b4';
     // 新牌立即选中（干净响应，无动画冲突）
     selectedTile = { row, col };
     if (tileElements[row][col]) tileElements[row][col].classList.add('selected');
-    playSelectSfx();  // 选中音效
     speakWord(type);  // 切换选中时也朗读新单词
   }
 }
