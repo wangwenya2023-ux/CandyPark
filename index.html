@@ -1278,7 +1278,7 @@ function speakWordMatch(type) {
       el.playbackRate = levelRate;
       el.play().catch(() => {
         audioCache.delete(matchKey);
-        speakWord(type); // 回退到普通版
+        // 不立即回退，避免双重声音
       });
       return;
     } catch (e) {
@@ -1293,16 +1293,15 @@ function speakWordMatch(type) {
     audio.volume = 1.0;
     audio.playbackRate = levelRate;
     audio.addEventListener('error', () => {
-      // 匹配版不可用，回退到普通版
-      speakWord(type);
+      // 匹配版不可用，不立即回退避免双重声音
     });
     audio.play().then(() => {
       audioCache.set(matchKey, { type: 'element', data: audio });
     }).catch(() => {
-      speakWord(type);
+      // 播放失败，不立即回退
     });
   } catch (e) {
-    speakWord(type);
+    // 加载失败，不立即回退
   }
 }
 
