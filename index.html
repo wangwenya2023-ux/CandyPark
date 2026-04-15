@@ -2273,7 +2273,7 @@ const lineColor = colors ? colors[1] : '#ff69b4';
     // 新牌立即选中（干净响应，无动画冲突）
     selectedTile = { row, col };
     if (tileElements[row][col]) tileElements[row][col].classList.add('selected');
-    speakWord(type);  // 切换选中时也朗读新单词
+    // 不匹配时不朗读新单词，避免双重声音
   }
 }
 
