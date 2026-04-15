@@ -898,6 +898,15 @@ const EMOJI_WORDS = EMOJI_DATA.map(d => d.word);
 // ============ Audio Engine (低延迟发音系统) ============
 let audioUnlocked = false;
 let audioCtx = null;
+// 全局音频互斥：同一时间只允许一个声音播放
+let _currentPlayingAudio = null;
+let _currentPlayingSource = null;
+function stopCurrentAudio() {
+  try { if (_currentPlayingSource) { _currentPlayingSource.stop(); } } catch(e) {}
+  try { if (_currentPlayingAudio) { _currentPlayingAudio.pause(); _currentPlayingAudio.currentTime = 0; } } catch(e) {}
+  _currentPlayingSource = null;
+  _currentPlayingAudio = null;
+}
 
 // ===== 选中特效音（霓虹电子音）=====
 function playSelectSfx() {
@@ -1024,7 +1033,7 @@ function unlockAudio() {
 document.addEventListener('click', unlockAudio, { once: false });
 document.addEventListener('touchstart', unlockAudio, { once: false });
 
-// 预加载当前关卡所有单词的音频（优先本地可爱女孩声音）
+// 预加载当前关卡所有单词的音频（只使用本地voices文件夹）
 function preloadLevelAudio(levelTypes) {
   // 取消上一次预加载
   if (currentPreloadAbort) currentPreloadAbort.abort();
@@ -1033,145 +1042,74 @@ function preloadLevelAudio(levelTypes) {
 
   levelTypes.forEach(type => {
     const word = EMOJI_DATA[type]?.word;
-    if (!word || audioCache.has(word)) return;
+    if (!word) return;
 
-    // 音频源优先级：本地可爱女孩声音 > 有道词典在线
     const localUrl = `voices/${word.toLowerCase()}.mp3`;
-    const matchUrl = `voices/${word.toLowerCase()}_match.mp3`; // 匹配欢呼版
-    const fallbackUrls = [
-      `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=1`,
-      `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`,
-    ];
+    const matchUrl = `voices/${word.toLowerCase()}_match.mp3`;
 
-    // 同时预加载匹配版语音
-    function preloadMatchVoice() {
-      if (controller.signal.aborted) return;
-      const matchKey = word + '_match';
-      if (audioCache.has(matchKey)) return;
+    // 预加载基础版
+    if (!audioCache.has(word)) {
       if (audioCtx) {
-        fetch(matchUrl, { signal: controller.signal })
-          .then(r => { if (!r.ok) throw new Error('no match file'); return r.arrayBuffer(); })
+        fetch(localUrl, { signal: controller.signal })
+          .then(r => { if (!r.ok) throw new Error('not found'); return r.arrayBuffer(); })
           .then(buf => audioCtx.decodeAudioData(buf))
           .then(decoded => {
             if (!controller.signal.aborted) {
-              audioCache.set(matchKey, { type: 'buffer', data: decoded });
-              console.log('[preload] ✅ 匹配欢呼版加载成功:', word);
-            }
-          })
-          .catch(() => {
-            // 匹配版加载失败不影响游戏，静默处理
-            console.warn('[preload] 匹配欢呼版不可用:', word);
-          });
-      } else {
-        const audio = new Audio(matchUrl);
-        audio.preload = 'auto';
-        audio.addEventListener('canplaythrough', () => {
-          if (!controller.signal.aborted) audioCache.set(word + '_match', { type: 'element', data: audio });
-        }, { once: true });
-        audio.load();
-      }
-    }
-    preloadMatchVoice();
-
-    // 先尝试本地文件（Edge TTS 生成的可爱女孩声音）
-    function tryPreloadLocal() {
-      if (controller.signal.aborted || audioCache.has(word)) return;
-
-      if (audioCtx) {
-        fetch(localUrl, { signal: controller.signal })
-          .then(r => {
-            if (!r.ok) throw new Error(`本地文件不存在: ${localUrl}`);
-            return r.arrayBuffer();
-          })
-          .then(buf => {
-            if (buf.byteLength < 100) throw new Error(`本地音频过小: ${word}`);
-            return audioCtx.decodeAudioData(buf);
-          })
-          .then(decoded => {
-            if (!controller.signal.aborted) {
               audioCache.set(word, { type: 'buffer', data: decoded });
-              console.log('[preload] ✅ 本地可爱声音加载成功:', word);
             }
           })
-          .catch(() => {
-            console.warn('[preload] 本地文件失败，回退到在线源:', word);
-            tryPreloadOnline(0);
-          });
+          .catch(() => {});
       } else {
-        // 无 AudioContext，用 Audio 元素加载本地文件
         const audio = new Audio(localUrl);
         audio.preload = 'auto';
         audio.addEventListener('canplaythrough', () => {
           if (!controller.signal.aborted && !audioCache.has(word)) {
             audioCache.set(word, { type: 'element', data: audio });
-            console.log('[preload] ✅ 本地可爱声音(element)加载成功:', word);
           }
         }, { once: true });
-        audio.addEventListener('error', () => {
-          console.warn('[preload] 本地Audio元素失败，回退到在线源:', word);
-          tryPreloadOnline(0);
+        audio.load();
+      }
+    }
+
+    // 预加载匹配版
+    const matchKey = word + '_match';
+    if (!audioCache.has(matchKey)) {
+      if (audioCtx) {
+        fetch(matchUrl, { signal: controller.signal })
+          .then(r => { if (!r.ok) throw new Error('not found'); return r.arrayBuffer(); })
+          .then(buf => audioCtx.decodeAudioData(buf))
+          .then(decoded => {
+            if (!controller.signal.aborted) {
+              audioCache.set(matchKey, { type: 'buffer', data: decoded });
+            }
+          })
+          .catch(() => {});
+      } else {
+        const audio = new Audio(matchUrl);
+        audio.preload = 'auto';
+        audio.addEventListener('canplaythrough', () => {
+          if (!controller.signal.aborted && !audioCache.has(matchKey)) {
+            audioCache.set(matchKey, { type: 'element', data: audio });
+          }
         }, { once: true });
         audio.load();
       }
     }
-
-    // 在线源回退
-    function tryPreloadOnline(idx) {
-      if (idx >= fallbackUrls.length || controller.signal.aborted || audioCache.has(word)) return;
-      const url = fallbackUrls[idx];
-
-      if (audioCtx) {
-        fetch(url, { signal: controller.signal })
-          .then(r => {
-            if (!r.ok) throw new Error(`HTTP ${r.status} for ${word}`);
-            return r.arrayBuffer();
-          })
-          .then(buf => {
-            if (buf.byteLength < 100) throw new Error(`音频数据过小(${buf.byteLength}B): ${word}`);
-            return audioCtx.decodeAudioData(buf);
-          })
-          .then(decoded => {
-            if (!controller.signal.aborted) {
-              audioCache.set(word, { type: 'buffer', data: decoded });
-            }
-          })
-          .catch((err) => {
-            console.warn('[preload] 在线源' + (idx+1) + '失败:', word, err.message || err);
-            if (idx + 1 < fallbackUrls.length) {
-              tryPreloadOnline(idx + 1);
-            } else {
-              if (!controller.signal.aborted && !audioCache.has(word)) {
-                const audio = new Audio(fallbackUrls[0]);
-                audio.preload = 'auto';
-                audio.load();
-                audioCache.set(word, { type: 'element', data: audio });
-              }
-            }
-          });
-      } else {
-        const audio = new Audio(url);
-        audio.preload = 'auto';
-        audio.load();
-        audioCache.set(word, { type: 'element', data: audio });
-      }
-    }
-
-    tryPreloadLocal();
   });
 }
 
-// 播放单词发音（低延迟，语速跟随关卡配置）
+// 播放单词发音（只使用本地voices文件，带互斥锁）
 function speakWord(type) {
   if (type < 0 || type >= EMOJI_DATA.length) return;
   const word = EMOJI_DATA[type].word;
-  // 关卡语速覆盖：Level1慢、Level2正常、Level3快
   const levelRate = LEVELS[currentLevel]?.speechRate ?? EMOJI_DATA[type].rate;
-
   unlockAudio();
+  // 停止当前正在播放的任何声音
+  stopCurrentAudio();
 
   const cached = audioCache.get(word);
 
-  // 优先使用预加载的 AudioBuffer（延迟最低）
+  // 优先使用预加载的 AudioBuffer
   if (cached && cached.type === 'buffer' && audioCtx) {
     try {
       const source = audioCtx.createBufferSource();
@@ -1179,12 +1117,11 @@ function speakWord(type) {
       source.playbackRate.value = levelRate;
       source.connect(audioCtx.destination);
       source.start(0);
+      _currentPlayingSource = source;
+      _currentPlayingAudio = null;
       return;
     } catch (e) {
-      console.warn('[speakWord] AudioBuffer播放失败，回退到Audio元素:', word, e);
-      // buffer 播放失败，清除缓存让后面的逻辑重新创建
       audioCache.delete(word);
-      // 不return，继续尝试下面的方法
     }
   }
 
@@ -1194,65 +1131,38 @@ function speakWord(type) {
       const el = cached.data;
       el.currentTime = 0;
       el.playbackRate = levelRate;
-      el.play().catch((err) => {
-        console.warn('[speakWord] Audio元素播放失败，使用浏览器TTS:', word, err);
-        audioCache.delete(word);
-        speakWordFallbackTTS(word, levelRate);
-      });
+      el.play().catch(() => {});
+      _currentPlayingAudio = el;
+      _currentPlayingSource = null;
       return;
     } catch (e) {
-      console.warn('[speakWord] Audio元素异常，回退到新建Audio:', word, e);
       audioCache.delete(word);
     }
   }
 
-  // 都没有缓存时，优先尝试本地可爱声音文件
+  // 没有缓存时，直接加载本地文件（不回退到任何在线源）
   const localUrl = `voices/${word.toLowerCase()}.mp3`;
-  const onlineUrls = [
-    `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=1`,
-    `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`,
-  ];
-  // 合并：本地文件优先 + 在线回退
-  const allUrls = [localUrl, ...onlineUrls];
-  let urlIdx = 0;
-  function tryPlayUrl() {
-    if (urlIdx >= allUrls.length) {
-      // 所有源都失败，使用浏览器 TTS
-      console.warn('[speakWord] 所有源失败，使用浏览器TTS:', word);
-      speakWordFallbackTTS(word, levelRate);
-      return;
-    }
-    try {
-      const url = allUrls[urlIdx++];
-      const audio = new Audio(url);
-      audio.volume = 1.0;
-      audio.playbackRate = levelRate;
-      audio.addEventListener('error', () => {
-        console.warn('[speakWord] 音频源加载失败，尝试下一个:', word, url);
-        tryPlayUrl();
-      });
-      audio.play().then(() => {
-        // 播放成功，缓存起来
-        audioCache.set(word, { type: 'element', data: audio });
-      }).catch(() => {
-        console.warn('[speakWord] 播放失败，尝试下一个:', word);
-        tryPlayUrl();
-      });
-    } catch (e) {
-      tryPlayUrl();
-    }
-  }
-  tryPlayUrl();
+  try {
+    const audio = new Audio(localUrl);
+    audio.volume = 1.0;
+    audio.playbackRate = levelRate;
+    audio.play().then(() => {
+      audioCache.set(word, { type: 'element', data: audio });
+    }).catch(() => {});
+    _currentPlayingAudio = audio;
+    _currentPlayingSource = null;
+  } catch (e) {}
 }
 
-// 匹配成功时播放欢呼版语音（带语气词如"Yaaay! Happy!"）
+// 匹配成功时播放匹配版语音（带互斥锁，只用本地文件）
 function speakWordMatch(type) {
   if (type < 0 || type >= EMOJI_DATA.length) return;
   const word = EMOJI_DATA[type].word;
   const matchKey = word + '_match';
   const levelRate = LEVELS[currentLevel]?.speechRate ?? EMOJI_DATA[type].rate;
-
   unlockAudio();
+  // 停止当前正在播放的任何声音
+  stopCurrentAudio();
 
   const cached = audioCache.get(matchKey);
 
@@ -1264,6 +1174,8 @@ function speakWordMatch(type) {
       source.playbackRate.value = levelRate;
       source.connect(audioCtx.destination);
       source.start(0);
+      _currentPlayingSource = source;
+      _currentPlayingAudio = null;
       return;
     } catch (e) {
       audioCache.delete(matchKey);
@@ -1276,73 +1188,30 @@ function speakWordMatch(type) {
       const el = cached.data;
       el.currentTime = 0;
       el.playbackRate = levelRate;
-      el.play().catch(() => {
-        audioCache.delete(matchKey);
-        // 不立即回退，避免双重声音
-      });
+      el.play().catch(() => {});
+      _currentPlayingAudio = el;
+      _currentPlayingSource = null;
       return;
     } catch (e) {
       audioCache.delete(matchKey);
     }
   }
 
-  // 没有缓存时，尝试直接加载匹配版文件
+  // 没有缓存时，直接加载本地匹配版文件
   const matchUrl = `voices/${word.toLowerCase()}_match.mp3`;
   try {
     const audio = new Audio(matchUrl);
     audio.volume = 1.0;
     audio.playbackRate = levelRate;
-    audio.addEventListener('error', () => {
-      // 匹配版不可用，不立即回退避免双重声音
-    });
     audio.play().then(() => {
       audioCache.set(matchKey, { type: 'element', data: audio });
-    }).catch(() => {
-      // 播放失败，不立即回退
-    });
-  } catch (e) {
-    // 加载失败，不立即回退
-  }
+    }).catch(() => {});
+    _currentPlayingAudio = audio;
+    _currentPlayingSource = null;
+  } catch (e) {}
 }
 
-// 浏览器内置 TTS 备用方案（当有道词典不可用时）
-let _ttsVoicesReady = false;
-let _ttsFemaleVoice = null;
-function _initTTSVoices() {
-  if (_ttsVoicesReady) return;
-  const voices = window.speechSynthesis?.getVoices() || [];
-  if (voices.length === 0) return;
-  _ttsVoicesReady = true;
-  // 优先选择英文女声
-  _ttsFemaleVoice = voices.find(v => /female/i.test(v.name) && /en/i.test(v.lang))
-    || voices.find(v => /zira|samantha|karen|victoria|susan|hazel|libby|jenny|aria/i.test(v.name))
-    || voices.find(v => /en[-_]US/i.test(v.lang) && !/male/i.test(v.name))
-    || voices.find(v => /en/i.test(v.lang))
-    || null;
-}
-if ('speechSynthesis' in window) {
-  window.speechSynthesis.addEventListener('voiceschanged', _initTTSVoices);
-  _initTTSVoices();
-}
-
-function speakWordFallbackTTS(word, rate) {
-  try {
-    if (!('speechSynthesis' in window)) return;
-    _initTTSVoices(); // 确保已初始化
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(word);
-    utter.lang = 'en-US';
-    utter.rate = rate || 0.9;
-    utter.pitch = 1.1; // 稍高音调，更接近女声
-    utter.volume = 1.0;
-    if (_ttsFemaleVoice) {
-      utter.voice = _ttsFemaleVoice;
-    }
-    window.speechSynthesis.speak(utter);
-  } catch (e) {
-    console.warn('[TTS fallback] 浏览器TTS也失败:', e);
-  }
-}
+// 浏览器TTS和有道词典已完全移除，只使用本地voices文件夹的mp3
 
 // ===== 预加载动态表情图 =====
 const SPRITE_IMG_ACTIVE = new Image();
