@@ -901,11 +901,39 @@ let audioCtx = null;
 // 全局音频互斥：同一时间只允许一个声音播放
 let _currentPlayingAudio = null;
 let _currentPlayingSource = null;
+let _masterGain = null;  // 全局音量总线
+let _speechDebounceTimer = null;  // 语音防抖计时器
+let _speechGeneration = 0;  // 语音代数，用于取消过期播放
+
+function getMasterGain() {
+  if (!audioCtx) return null;
+  if (!_masterGain) {
+    _masterGain = audioCtx.createGain();
+    _masterGain.connect(audioCtx.destination);
+  }
+  return _masterGain;
+}
+
 function stopCurrentAudio() {
+  // 立即将总线音量归零（瞬间静音，比stop()更快）
+  try {
+    if (_masterGain && audioCtx) {
+      _masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+      _masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    }
+  } catch(e) {}
+  // 停止 AudioBufferSource
   try { if (_currentPlayingSource) { _currentPlayingSource.stop(); } } catch(e) {}
+  // 停止 HTML Audio 元素
   try { if (_currentPlayingAudio) { _currentPlayingAudio.pause(); _currentPlayingAudio.currentTime = 0; } } catch(e) {}
   _currentPlayingSource = null;
   _currentPlayingAudio = null;
+  // 恢复总线音量（为下一次播放准备）
+  try {
+    if (_masterGain && audioCtx) {
+      _masterGain.gain.setValueAtTime(1.0, audioCtx.currentTime + 0.01);
+    }
+  } catch(e) {}
 }
 
 // ===== 选中特效音（霓虹电子音）=====
@@ -1098,31 +1126,28 @@ function preloadLevelAudio(levelTypes) {
   });
 }
 
-// 播放单词发音（只使用本地voices文件，带互斥锁）
-function speakWord(type) {
-  if (type < 0 || type >= EMOJI_DATA.length) return;
-  const word = EMOJI_DATA[type].word;
-  // 统一使用原始速度播放，确保声音一致性
-  const playRate = 1.0;
-  unlockAudio();
-  // 停止当前正在播放的任何声音
-  stopCurrentAudio();
+// 内部播放函数：实际执行音频播放（通过masterGain总线）
+function _playVoice(cacheKey, fileUrl) {
+  const gen = ++_speechGeneration;  // 递增代数
+  stopCurrentAudio();  // 先彻底停止上一个
 
-  const cached = audioCache.get(word);
+  const cached = audioCache.get(cacheKey);
 
-  // 优先使用预加载的 AudioBuffer
+  // 优先使用预加载的 AudioBuffer（通过masterGain总线）
   if (cached && cached.type === 'buffer' && audioCtx) {
     try {
+      const gain = getMasterGain();
+      if (!gain) return;
       const source = audioCtx.createBufferSource();
       source.buffer = cached.data;
-      source.playbackRate.value = playRate;
-      source.connect(audioCtx.destination);
+      source.playbackRate.value = 1.0;
+      source.connect(gain);
       source.start(0);
       _currentPlayingSource = source;
       _currentPlayingAudio = null;
       return;
     } catch (e) {
-      audioCache.delete(word);
+      audioCache.delete(cacheKey);
     }
   }
 
@@ -1131,86 +1156,73 @@ function speakWord(type) {
     try {
       const el = cached.data;
       el.currentTime = 0;
-      el.playbackRate = playRate;
+      el.playbackRate = 1.0;
       el.play().catch(() => {});
       _currentPlayingAudio = el;
       _currentPlayingSource = null;
       return;
     } catch (e) {
-      audioCache.delete(word);
+      audioCache.delete(cacheKey);
     }
   }
 
-  // 没有缓存时，直接加载本地文件（不回退到任何在线源）
-  const localUrl = `voices/${word.toLowerCase()}.mp3?v=20260415`;
+  // 没有缓存时，直接加载本地文件
   try {
-    const audio = new Audio(localUrl);
+    const audio = new Audio(fileUrl);
     audio.volume = 1.0;
-    audio.playbackRate = playRate;
+    audio.playbackRate = 1.0;
     audio.play().then(() => {
-      audioCache.set(word, { type: 'element', data: audio });
+      // 只有当代数未过期时才缓存
+      if (gen === _speechGeneration) {
+        audioCache.set(cacheKey, { type: 'element', data: audio });
+      }
     }).catch(() => {});
     _currentPlayingAudio = audio;
     _currentPlayingSource = null;
   } catch (e) {}
 }
 
-// 匹配成功时播放匹配版语音（带互斥锁，只用本地文件）
+// 播放单词发音（选中卡片时，带防抖）
+function speakWord(type) {
+  if (type < 0 || type >= EMOJI_DATA.length) return;
+  const word = EMOJI_DATA[type].word;
+  unlockAudio();
+
+  // 防抖：快速连续点击时，取消前一个还没开始的播放
+  if (_speechDebounceTimer) {
+    clearTimeout(_speechDebounceTimer);
+    _speechDebounceTimer = null;
+  }
+
+  // 立即停止当前声音
+  stopCurrentAudio();
+
+  // 延迟30ms再播放，给上一个声音足够时间完全停止
+  _speechDebounceTimer = setTimeout(() => {
+    _speechDebounceTimer = null;
+    _playVoice(word, `voices/${word.toLowerCase()}.mp3?v=20260415`);
+  }, 30);
+}
+
+// 匹配成功时播放匹配版语音（立即停止一切，然后播放）
 function speakWordMatch(type) {
   if (type < 0 || type >= EMOJI_DATA.length) return;
   const word = EMOJI_DATA[type].word;
   const matchKey = word + '_match';
-  // 统一使用原始速度播放，确保声音一致性
-  const playRate = 1.0;
   unlockAudio();
-  // 停止当前正在播放的任何声音
+
+  // 取消任何待执行的防抖播放
+  if (_speechDebounceTimer) {
+    clearTimeout(_speechDebounceTimer);
+    _speechDebounceTimer = null;
+  }
+  // 彻底停止当前声音
   stopCurrentAudio();
 
-  const cached = audioCache.get(matchKey);
-
-  // 优先使用预加载的匹配版 AudioBuffer
-  if (cached && cached.type === 'buffer' && audioCtx) {
-    try {
-      const source = audioCtx.createBufferSource();
-      source.buffer = cached.data;
-      source.playbackRate.value = playRate;
-      source.connect(audioCtx.destination);
-      source.start(0);
-      _currentPlayingSource = source;
-      _currentPlayingAudio = null;
-      return;
-    } catch (e) {
-      audioCache.delete(matchKey);
-    }
-  }
-
-  // 其次使用预加载的 Audio 元素
-  if (cached && cached.type === 'element') {
-    try {
-      const el = cached.data;
-      el.currentTime = 0;
-      el.playbackRate = playRate;
-      el.play().catch(() => {});
-      _currentPlayingAudio = el;
-      _currentPlayingSource = null;
-      return;
-    } catch (e) {
-      audioCache.delete(matchKey);
-    }
-  }
-
-  // 没有缓存时，直接加载本地匹配版文件
-  const matchUrl = `voices/${word.toLowerCase()}_match.mp3?v=20260415`;
-  try {
-    const audio = new Audio(matchUrl);
-    audio.volume = 1.0;
-    audio.playbackRate = playRate;
-    audio.play().then(() => {
-      audioCache.set(matchKey, { type: 'element', data: audio });
-    }).catch(() => {});
-    _currentPlayingAudio = audio;
-    _currentPlayingSource = null;
-  } catch (e) {}
+  // 延迟50ms再播放匹配音，确保选中音完全停止，避免重叠
+  setTimeout(() => {
+    _playVoice(matchKey, `voices/${word.toLowerCase()}_match.mp3?v=20260415`);
+  }, 50);
 }
 
 // 浏览器TTS和有道词典已完全移除，只使用本地voices文件夹的mp3
