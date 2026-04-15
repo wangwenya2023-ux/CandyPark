@@ -874,23 +874,23 @@ let currentLevel = 0;
 
 // TTS word mapping - 每个情感都有独特的语气和音效配置
 const EMOJI_DATA = [
-  { word: 'Happy',     zh: '开心的',   pitch: 1.1, rate: 0.9, volume: 1.0,
+  { word: 'Happy',     zh: '开心的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [523, 659, 784], type: 'sine', dur: 0.08, gap: 0.04, vol: 0.12 } },      // C5-E5-G5 上行大三和弦
-  { word: 'Sad',       zh: '伤心的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+  { word: 'Sad',       zh: '伤心的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [392, 349, 330], type: 'sine', dur: 0.15, gap: 0.06, vol: 0.08 } },      // G4-F4-E4 下行小调
-  { word: 'Angry',     zh: '生气的',   pitch: 1.0, rate: 0.9, volume: 1.0,
+  { word: 'Angry',     zh: '生气的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [220, 185, 165], type: 'sawtooth', dur: 0.06, gap: 0.02, vol: 0.10 } },  // 低沉锯齿波，急促
-  { word: 'Surprised', zh: '惊讶的',   pitch: 1.1, rate: 0.85, volume: 1.0,
+  { word: 'Surprised', zh: '惊讶的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [440, 880, 1320], type: 'sine', dur: 0.05, gap: 0.03, vol: 0.10 } },     // 快速上行八度跳跃
-  { word: 'Confused',  zh: '困惑的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+  { word: 'Confused',  zh: '困惑的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [440, 466, 440], type: 'triangle', dur: 0.12, gap: 0.05, vol: 0.08 } },  // 半音犹豫
-  { word: 'Scared',    zh: '害怕的',   pitch: 1.1, rate: 0.85, volume: 1.0,
+  { word: 'Scared',    zh: '害怕的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [880, 932, 880, 932], type: 'sine', dur: 0.04, gap: 0.02, vol: 0.09 } }, // 高频颤抖
-  { word: 'Tired',     zh: '疲倦的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+  { word: 'Tired',     zh: '疲倦的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [330, 294, 262], type: 'sine', dur: 0.2, gap: 0.08, vol: 0.06 } },       // 缓慢下行
-  { word: 'Smug',      zh: '得意的',   pitch: 1.0, rate: 0.9, volume: 1.0,
+  { word: 'Smug',      zh: '得意的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [523, 587, 659, 784], type: 'triangle', dur: 0.07, gap: 0.03, vol: 0.10 } }, // 得意上行
-  { word: 'Pouting',   zh: '嘟嘴的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+  { word: 'Pouting',   zh: '嘟嘴的',   pitch: 1.0, rate: 1.0, volume: 1.0,
     sfx: { freq: [523, 494, 466], type: 'sine', dur: 0.1, gap: 0.04, vol: 0.09 } },       // 撒娇下行半音
 ];
 const EMOJI_WORDS = EMOJI_DATA.map(d => d.word);
@@ -1044,8 +1044,8 @@ function preloadLevelAudio(levelTypes) {
     const word = EMOJI_DATA[type]?.word;
     if (!word) return;
 
-    const localUrl = `voices/${word.toLowerCase()}.mp3`;
-    const matchUrl = `voices/${word.toLowerCase()}_match.mp3`;
+    const localUrl = `voices/${word.toLowerCase()}.mp3?v=20260415`;
+    const matchUrl = `voices/${word.toLowerCase()}_match.mp3?v=20260415`;
 
     // 预加载基础版
     if (!audioCache.has(word)) {
@@ -1102,7 +1102,8 @@ function preloadLevelAudio(levelTypes) {
 function speakWord(type) {
   if (type < 0 || type >= EMOJI_DATA.length) return;
   const word = EMOJI_DATA[type].word;
-  const levelRate = LEVELS[currentLevel]?.speechRate ?? EMOJI_DATA[type].rate;
+  // 统一使用原始速度播放，确保声音一致性
+  const playRate = 1.0;
   unlockAudio();
   // 停止当前正在播放的任何声音
   stopCurrentAudio();
@@ -1114,7 +1115,7 @@ function speakWord(type) {
     try {
       const source = audioCtx.createBufferSource();
       source.buffer = cached.data;
-      source.playbackRate.value = levelRate;
+      source.playbackRate.value = playRate;
       source.connect(audioCtx.destination);
       source.start(0);
       _currentPlayingSource = source;
@@ -1130,7 +1131,7 @@ function speakWord(type) {
     try {
       const el = cached.data;
       el.currentTime = 0;
-      el.playbackRate = levelRate;
+      el.playbackRate = playRate;
       el.play().catch(() => {});
       _currentPlayingAudio = el;
       _currentPlayingSource = null;
@@ -1141,11 +1142,11 @@ function speakWord(type) {
   }
 
   // 没有缓存时，直接加载本地文件（不回退到任何在线源）
-  const localUrl = `voices/${word.toLowerCase()}.mp3`;
+  const localUrl = `voices/${word.toLowerCase()}.mp3?v=20260415`;
   try {
     const audio = new Audio(localUrl);
     audio.volume = 1.0;
-    audio.playbackRate = levelRate;
+    audio.playbackRate = playRate;
     audio.play().then(() => {
       audioCache.set(word, { type: 'element', data: audio });
     }).catch(() => {});
@@ -1159,7 +1160,8 @@ function speakWordMatch(type) {
   if (type < 0 || type >= EMOJI_DATA.length) return;
   const word = EMOJI_DATA[type].word;
   const matchKey = word + '_match';
-  const levelRate = LEVELS[currentLevel]?.speechRate ?? EMOJI_DATA[type].rate;
+  // 统一使用原始速度播放，确保声音一致性
+  const playRate = 1.0;
   unlockAudio();
   // 停止当前正在播放的任何声音
   stopCurrentAudio();
@@ -1171,7 +1173,7 @@ function speakWordMatch(type) {
     try {
       const source = audioCtx.createBufferSource();
       source.buffer = cached.data;
-      source.playbackRate.value = levelRate;
+      source.playbackRate.value = playRate;
       source.connect(audioCtx.destination);
       source.start(0);
       _currentPlayingSource = source;
@@ -1187,7 +1189,7 @@ function speakWordMatch(type) {
     try {
       const el = cached.data;
       el.currentTime = 0;
-      el.playbackRate = levelRate;
+      el.playbackRate = playRate;
       el.play().catch(() => {});
       _currentPlayingAudio = el;
       _currentPlayingSource = null;
@@ -1198,11 +1200,11 @@ function speakWordMatch(type) {
   }
 
   // 没有缓存时，直接加载本地匹配版文件
-  const matchUrl = `voices/${word.toLowerCase()}_match.mp3`;
+  const matchUrl = `voices/${word.toLowerCase()}_match.mp3?v=20260415`;
   try {
     const audio = new Audio(matchUrl);
     audio.volume = 1.0;
-    audio.playbackRate = levelRate;
+    audio.playbackRate = playRate;
     audio.play().then(() => {
       audioCache.set(matchKey, { type: 'element', data: audio });
     }).catch(() => {});
