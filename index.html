@@ -872,17 +872,26 @@ const LEVELS = [
 ];
 let currentLevel = 0;
 
-// TTS word mapping - direct clear pronunciation with Chinese meaning
+// TTS word mapping - 每个情感都有独特的语气和音效配置
 const EMOJI_DATA = [
-  { word: 'Happy',     zh: '开心的',   pitch: 1.1, rate: 0.9, volume: 1.0 },
-  { word: 'Sad',       zh: '伤心的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
-  { word: 'Angry',     zh: '生气的',   pitch: 1.0, rate: 0.9, volume: 1.0 },
-  { word: 'Surprised', zh: '惊讶的',   pitch: 1.1, rate: 0.85, volume: 1.0 },
-  { word: 'Confused',  zh: '困惑的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
-  { word: 'Scared',    zh: '害怕的',   pitch: 1.1, rate: 0.85, volume: 1.0 },
-  { word: 'Tired',     zh: '疲倦的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
-  { word: 'Smug',      zh: '得意的',   pitch: 1.0, rate: 0.9, volume: 1.0 },
-  { word: 'Pouting',   zh: '嘟嘴的',   pitch: 1.0, rate: 0.85, volume: 1.0 },
+  { word: 'Happy',     zh: '开心的',   pitch: 1.1, rate: 0.9, volume: 1.0,
+    sfx: { freq: [523, 659, 784], type: 'sine', dur: 0.08, gap: 0.04, vol: 0.12 } },      // C5-E5-G5 上行大三和弦
+  { word: 'Sad',       zh: '伤心的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+    sfx: { freq: [392, 349, 330], type: 'sine', dur: 0.15, gap: 0.06, vol: 0.08 } },      // G4-F4-E4 下行小调
+  { word: 'Angry',     zh: '生气的',   pitch: 1.0, rate: 0.9, volume: 1.0,
+    sfx: { freq: [220, 185, 165], type: 'sawtooth', dur: 0.06, gap: 0.02, vol: 0.10 } },  // 低沉锯齿波，急促
+  { word: 'Surprised', zh: '惊讶的',   pitch: 1.1, rate: 0.85, volume: 1.0,
+    sfx: { freq: [440, 880, 1320], type: 'sine', dur: 0.05, gap: 0.03, vol: 0.10 } },     // 快速上行八度跳跃
+  { word: 'Confused',  zh: '困惑的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+    sfx: { freq: [440, 466, 440], type: 'triangle', dur: 0.12, gap: 0.05, vol: 0.08 } },  // 半音犹豫
+  { word: 'Scared',    zh: '害怕的',   pitch: 1.1, rate: 0.85, volume: 1.0,
+    sfx: { freq: [880, 932, 880, 932], type: 'sine', dur: 0.04, gap: 0.02, vol: 0.09 } }, // 高频颤抖
+  { word: 'Tired',     zh: '疲倦的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+    sfx: { freq: [330, 294, 262], type: 'sine', dur: 0.2, gap: 0.08, vol: 0.06 } },       // 缓慢下行
+  { word: 'Smug',      zh: '得意的',   pitch: 1.0, rate: 0.9, volume: 1.0,
+    sfx: { freq: [523, 587, 659, 784], type: 'triangle', dur: 0.07, gap: 0.03, vol: 0.10 } }, // 得意上行
+  { word: 'Pouting',   zh: '嘟嘴的',   pitch: 1.0, rate: 0.85, volume: 1.0,
+    sfx: { freq: [523, 494, 466], type: 'sine', dur: 0.1, gap: 0.04, vol: 0.09 } },       // 撒娇下行半音
 ];
 const EMOJI_WORDS = EMOJI_DATA.map(d => d.word);
 
@@ -915,6 +924,53 @@ function playSelectSfx() {
     gain.connect(audioCtx.destination);
     osc1.start(now); osc2.start(now); osc3.start(now);
     osc1.stop(now + 0.1); osc2.stop(now + 0.1); osc3.stop(now + 0.1);
+  } catch(e) {}
+}
+
+// ===== 情感音效（匹配成功时的前奏音效）=====
+function playEmotionSfx(type) {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const sfx = EMOJI_DATA[type]?.sfx;
+    if (!sfx) return;
+    const now = audioCtx.currentTime;
+    const { freq, type: oscType, dur, gap, vol } = sfx;
+    freq.forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = oscType;
+      osc.frequency.setValueAtTime(f, now + i * (dur + gap));
+      gain.gain.setValueAtTime(vol, now + i * (dur + gap));
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * (dur + gap) + dur);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + i * (dur + gap));
+      osc.stop(now + i * (dur + gap) + dur + 0.01);
+    });
+  } catch(e) {}
+}
+
+// ===== 匹配成功欢呼音效（更丰富的和弦）=====
+function playMatchCelebrateSfx() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const now = audioCtx.currentTime;
+    // 欢快的上行琶音 C5-E5-G5-C6
+    const notes = [523, 659, 784, 1047];
+    notes.forEach((f, i) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(f, now + i * 0.06);
+      gain.gain.setValueAtTime(0.08, now + i * 0.06);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.12);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now + i * 0.06);
+      osc.stop(now + i * 0.06 + 0.15);
+    });
   } catch(e) {}
 }
 
@@ -981,10 +1037,41 @@ function preloadLevelAudio(levelTypes) {
 
     // 音频源优先级：本地可爱女孩声音 > 有道词典在线
     const localUrl = `voices/${word.toLowerCase()}.mp3`;
+    const matchUrl = `voices/${word.toLowerCase()}_match.mp3`; // 匹配欢呼版
     const fallbackUrls = [
       `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=1`,
       `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`,
     ];
+
+    // 同时预加载匹配版语音
+    function preloadMatchVoice() {
+      if (controller.signal.aborted) return;
+      const matchKey = word + '_match';
+      if (audioCache.has(matchKey)) return;
+      if (audioCtx) {
+        fetch(matchUrl, { signal: controller.signal })
+          .then(r => { if (!r.ok) throw new Error('no match file'); return r.arrayBuffer(); })
+          .then(buf => audioCtx.decodeAudioData(buf))
+          .then(decoded => {
+            if (!controller.signal.aborted) {
+              audioCache.set(matchKey, { type: 'buffer', data: decoded });
+              console.log('[preload] ✅ 匹配欢呼版加载成功:', word);
+            }
+          })
+          .catch(() => {
+            // 匹配版加载失败不影响游戏，静默处理
+            console.warn('[preload] 匹配欢呼版不可用:', word);
+          });
+      } else {
+        const audio = new Audio(matchUrl);
+        audio.preload = 'auto';
+        audio.addEventListener('canplaythrough', () => {
+          if (!controller.signal.aborted) audioCache.set(word + '_match', { type: 'element', data: audio });
+        }, { once: true });
+        audio.load();
+      }
+    }
+    preloadMatchVoice();
 
     // 先尝试本地文件（Edge TTS 生成的可爱女孩声音）
     function tryPreloadLocal() {
@@ -1156,6 +1243,67 @@ function speakWord(type) {
     }
   }
   tryPlayUrl();
+}
+
+// 匹配成功时播放欢呼版语音（带语气词如"Yaaay! Happy!"）
+function speakWordMatch(type) {
+  if (type < 0 || type >= EMOJI_DATA.length) return;
+  const word = EMOJI_DATA[type].word;
+  const matchKey = word + '_match';
+  const levelRate = LEVELS[currentLevel]?.speechRate ?? EMOJI_DATA[type].rate;
+
+  unlockAudio();
+
+  const cached = audioCache.get(matchKey);
+
+  // 优先使用预加载的匹配版 AudioBuffer
+  if (cached && cached.type === 'buffer' && audioCtx) {
+    try {
+      const source = audioCtx.createBufferSource();
+      source.buffer = cached.data;
+      source.playbackRate.value = levelRate;
+      source.connect(audioCtx.destination);
+      source.start(0);
+      return;
+    } catch (e) {
+      audioCache.delete(matchKey);
+    }
+  }
+
+  // 其次使用预加载的 Audio 元素
+  if (cached && cached.type === 'element') {
+    try {
+      const el = cached.data;
+      el.currentTime = 0;
+      el.playbackRate = levelRate;
+      el.play().catch(() => {
+        audioCache.delete(matchKey);
+        speakWord(type); // 回退到普通版
+      });
+      return;
+    } catch (e) {
+      audioCache.delete(matchKey);
+    }
+  }
+
+  // 没有缓存时，尝试直接加载匹配版文件
+  const matchUrl = `voices/${word.toLowerCase()}_match.mp3`;
+  try {
+    const audio = new Audio(matchUrl);
+    audio.volume = 1.0;
+    audio.playbackRate = levelRate;
+    audio.addEventListener('error', () => {
+      // 匹配版不可用，回退到普通版
+      speakWord(type);
+    });
+    audio.play().then(() => {
+      audioCache.set(matchKey, { type: 'element', data: audio });
+    }).catch(() => {
+      speakWord(type);
+    });
+  } catch (e) {
+    speakWord(type);
+  }
 }
 
 // 浏览器内置 TTS 备用方案（当有道词典不可用时）
@@ -2074,8 +2222,9 @@ function onTileClick(row, col) {
 const lineColor = colors ? colors[1] : '#ff69b4';
         drawLinkPath(path, lineColor);
 
-        // 立即播放语音，不等连线动画结束（消除延迟感）
-        speakWord(type);
+        // 匹配成功！播放情感音效前奏 + 欢呼版语音
+        playEmotionSfx(type);
+        speakWordMatch(type);
 
         // 弹出后短暂停留，再切换到欢庆消失动画
         setTimeout(() => {
